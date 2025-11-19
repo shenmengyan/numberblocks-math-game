@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Numberblocks Math Fun! (手機優化版)</title>
+    <title>Numberblocks Math Fun! (Final Build Local)</title>
     <style>
         /* 基礎樣式和響應式排版 */
         body {
@@ -11,8 +11,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            /* 調整：確保填滿整個視窗高度，並讓內容集中 */
-            height: 100vh;
+            min-height: 100vh;
             background: linear-gradient(to bottom, #87CEEB, #B0E0E6);
             margin: 0;
             overflow: hidden;
@@ -36,18 +35,16 @@
             100% { transform: translateX(105vw); }
         }
 
-        /* 遊戲主容器 - 使用 VMAX 響應式單位 */
+        /* 遊戲主容器 - 佔據約 80% 的視窗空間 */
         .game-container {
             background-color: rgba(255, 255, 255, 0.9);
             border-radius: 25px;
-            /* 調整：減少垂直內邊距，讓內容更貼近螢幕邊緣 */
-            padding: 2vmin;
+            padding: 2vmin; 
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
             text-align: center;
-            width: 90%;
-            max-width: 450px;
-            /* 調整：讓容器可以佔據更多的垂直空間 */
-            max-height: 98vh; 
+            width: 85%;
+            max-width: 80vh; 
+            max-height: 90vh;
             display: flex;
             flex-direction: column;
             gap: 2vmin;
@@ -71,20 +68,20 @@
             text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
         }
 
-        /* 題目區 - 核心放大區域 */
+        /* 題目區 - 核心放大區域 (200%!) */
         .question-area {
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 2vmin;
             margin-bottom: 2vmin;
-            /* 調整：讓整體高度增加 */
-            min-height: 22vmin; 
+            /* 調整：讓整體高度增加 (22vmin * 2 = 44vmin) */
+            min-height: 44vmin; 
         }
 
         .question-area img {
-            /* 調整：圖片尺寸顯著放大 */
-            height: 22vmin; 
+            /* 調整：圖片尺寸放大 200% */
+            height: 44vmin; 
             object-fit: contain;
             transition: transform 0.3s ease-out, opacity 0.5s;
             animation: none !important; 
@@ -103,22 +100,22 @@
         }
 
         .question-area .operator, .question-area .equals {
-            /* 調整：運算符號放大 */
-            font-size: 8vmin;
+            /* 調整：運算符號放大 (8vmin * 2 = 16vmin) */
+            font-size: 16vmin;
             font-weight: bold;
             color: #333;
         }
         .question-area .placeholder {
-            /* 調整：問號區塊配合圖片放大 */
-            width: 22vmin;
-            height: 22vmin;
+            /* 調整：問號區塊配合圖片放大 (22vmin * 2 = 44vmin) */
+            width: 44vmin;
+            height: 44vmin;
             border: 2px dashed #999;
             border-radius: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
-            /* 調整：問號字體放大 */
-            font-size: 8vmin;
+            /* 調整：問號字體放大 (8vmin * 2 = 16vmin) */
+            font-size: 16vmin;
             color: #666;
             font-weight: bold;
             background-color: #f0f0f0;
@@ -139,7 +136,7 @@
             padding: 1vmin;
             cursor: pointer;
             position: relative;
-            /* 調整：選項按鈕高度放大 */
+            /* 保持選項按鈕高度不變，避免擠壓 (25vmin) */
             height: 25vmin; 
             display: flex;
             justify-content: center;
@@ -196,11 +193,11 @@
 
         .firework {
             position: absolute;
-            width: 8px; 
-            height: 8px; 
+            width: 8px; /* 粒子更大 */
+            height: 8px; /* 粒子更大 */
             border-radius: 50%;
             background: var(--color);
-            box-shadow: 0 0 8px var(--color); 
+            box-shadow: 0 0 8px var(--color); /* 光暈更大 */
             animation: firework 2s ease-out forwards;
         }
         
@@ -259,8 +256,7 @@
     <audio id="fireworksSound" src="fireworks.mp3" preload="auto"></audio>
 
     <script>
-        // *** 圖片連結：使用本地檔案路徑 (最穩定) ***
-        // 🚨 再次提醒：請確保您的 GitHub 倉庫中有這些小寫命名的檔案！
+        // *** 圖片連結：已修正為本地檔案路徑 ***
         const numberblockImages = {
             1: '1.png', 
             2: '2.png',
@@ -404,4 +400,86 @@
             shuffledOptions.forEach(option => {
                 const button = document.createElement('div');
                 button.classList.add('option-button');
-                button.innerHTML = `<img src="${numberblockImages[option]}" alt="
+                button.innerHTML = `<img src="${numberblockImages[option]}" alt="Numberblock ${option}" data-value="${option}">`;
+                button.addEventListener('click', () => checkAnswer(option, button));
+                
+                const imgElement = button.querySelector('img');
+                if (imgElement.src.endsWith('.png') || imgElement.src.endsWith('.gif')) {
+                    imgElement.style.animation = 'breathing 3s infinite ease-in-out';
+                }
+                optionsArea.appendChild(button);
+            });
+        }
+
+        function playSuccessAnimation() {
+            // 播放音效
+            if (fireworksSound) {
+                fireworksSound.currentTime = 0;
+                fireworksSound.play().catch(e => console.error("Audio play failed:", e));
+            }
+            
+            // 啟動全頁面煙火特效
+            createFireworks();
+
+            // 答對動畫
+            let finalImg = `<img class="final-answer-img" src="${numberblockImages[correctAnswer]}" alt="Answer ${correctAnswer}" style="height: 100%; object-fit: contain;">`;
+            answerPlaceholder.innerHTML = finalImg;
+            answerPlaceholder.style.backgroundColor = '#D4EDDA'; 
+            questionArea.classList.add('flash');
+
+            if (opValue === '+') {
+                // 加法：num2 瞬間向上跳躍並消失合體
+                num2Img.style.animation = 'jumpAndMerge 0.6s ease-out forwards';
+                num1Img.style.animation = 'flashSuccess 0.3s 3'; 
+            } else {
+                // 減法：num2 飛出，模擬分離
+                num2Img.style.animation = 'flyOut 0.8s ease-in forwards';
+                num1Img.style.animation = 'flashSuccess 0.3s 3'; 
+            }
+            
+            // 2 秒後 (短暫慶祝時間) 生成新題目
+            setTimeout(() => {
+                generateQuestion();
+                document.querySelectorAll('.option-button').forEach(btn => {
+                    btn.style.pointerEvents = 'auto';
+                });
+            }, 2000); 
+        }
+
+        function checkAnswer(selectedAnswer, button) {
+            document.querySelectorAll('.option-button').forEach(btn => {
+                btn.style.pointerEvents = 'none';
+            });
+            document.querySelectorAll('.option-button').forEach(btn => {
+                btn.classList.remove('wrong');
+                const wrongIndicator = btn.querySelector('.wrong-indicator');
+                if (wrongIndicator) wrongIndicator.remove();
+            });
+
+            if (selectedAnswer === correctAnswer) {
+                button.classList.add('correct');
+                updateScore(1);
+                playSuccessAnimation();
+            } else {
+                button.classList.add('wrong');
+                const wrongIndicator = document.createElement('div');
+                wrongIndicator.classList.add('wrong-indicator');
+                wrongIndicator.textContent = '❌';
+                button.appendChild(wrongIndicator);
+                
+                document.querySelectorAll('.option-button').forEach(btn => {
+                    btn.style.pointerEvents = 'auto';
+                });
+            }
+        }
+
+        // 頁面載入時
+        document.addEventListener('DOMContentLoaded', () => {
+            preloadAllImages();
+            updateScore(0);
+            generateQuestion();
+        });
+
+    </script>
+</body>
+</html>
