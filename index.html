@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Numberblocks Math Fun! (Final Build Local)</title>
+    <title>Numberblocks Math Fun! (Mobile Portrait)</title>
     <style>
         /* 基礎樣式和響應式排版 */
         body {
@@ -11,7 +11,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            /* 調整：移除 min-height: 100vh; 以利於移動端瀏覽器適配 */
+            height: 100vh; 
             background: linear-gradient(to bottom, #87CEEB, #B0E0E6);
             margin: 0;
             overflow: hidden;
@@ -44,6 +45,8 @@
             text-align: center;
             width: 90%;
             max-width: 450px;
+            /* 新增：確保內容在高度較大的手機上也能居中 */
+            max-height: 90vh;
             display: flex;
             flex-direction: column;
             gap: 2vmin;
@@ -249,18 +252,20 @@
     <audio id="fireworksSound" src="fireworks.mp3" preload="auto"></audio>
 
     <script>
-        // *** 圖片連結：全部切換為本地檔案路徑 ***
+        // *** 圖片連結 ***
+        // 注意：這些連結是您最後提供的 Postimages 連結。
+        // 如果您在手機上遇到圖片載入問題，請將它們改回本地路徑：'1.png', '2.png', 等等。
         const numberblockImages = {
-            1: '1.png', 
-            2: '2.png',
-            3: '3.png',
-            4: '4.png',
-            5: '5.png',
-            6: '6.png',
-            7: '7.png',
-            8: '8.png',
-            9: '9.png',
-            10: '10.png'
+            1: 'https://i.postimg.cc/mtyG4rc7/1.png', 
+            2: 'https://i.postimg.cc/0b0qvN6n/2.png',
+            3: 'https://i.postimg.cc/sv4Rz2BT/3.png',
+            4: 'https://i.postimg.cc/Xr2kmX5G/4.png',
+            5: 'https://i.postimg.cc/bs9jPvGL/5.png',
+            6: 'https://i.postimg.cc/5N7418bF/6.png', 
+            7: 'https://i.postimg.cc/yD6C8z9f/7.png',
+            8: 'https://i.postimg.cc/Yv2BCwgD/8.png',
+            9: 'https://i.postimg.cc/9DXHQjTN/9.png',
+            10: 'https://i.postimg.cc/BjZfnGDk/10.png'
         };
 
         const questionArea = document.getElementById('questionArea');
@@ -279,7 +284,7 @@
         let opValue = '';
         let score = 0;
 
-        // --- 全頁面煙火動畫函式 (功能不變) ---
+        // --- 全頁面煙火動畫函式 ---
         function createFireworks() {
             const colors = ['#FFC300', '#FF5733', '#C70039', '#900C3F', '#581845', '#00BFFF', '#32CD32', '#FF69B4'];
             const numBursts = 5; 
@@ -364,116 +369,5 @@
             num1Img.style.animation = '';
             num2Img.style.animation = '';
             
-            // 由於全部都是本地路徑，我們只需判斷檔案類型
             if (num1Img.src.endsWith('.png') || num1Img.src.endsWith('.gif')) { num1Img.style.animation = 'breathing 3s infinite ease-in-out'; }
-            if (num2Img.src.endsWith('.png') || num2Img.src.endsWith('.gif')) { num2Img.style.animation = 'breathing 3s infinite ease-in-out'; }
-
-
-            generateOptions(correctAnswer);
-        }
-
-        function generateOptions(correctAnswer) {
-            optionsArea.innerHTML = '';
-            document.querySelectorAll('.option-button').forEach(btn => {
-                btn.classList.remove('correct', 'wrong');
-                const wrongIndicator = btn.querySelector('.wrong-indicator');
-                if (wrongIndicator) wrongIndicator.remove();
-            });
-
-
-            let options = new Set();
-            options.add(correctAnswer); 
-
-            while (options.size < 3) {
-                let randomOption = Math.floor(Math.random() * 10) + 1; 
-                options.add(randomOption); 
-            }
-
-            let shuffledOptions = Array.from(options).sort(() => Math.random() - 0.5);
-
-            shuffledOptions.forEach(option => {
-                const button = document.createElement('div');
-                button.classList.add('option-button');
-                button.innerHTML = `<img src="${numberblockImages[option]}" alt="Numberblock ${option}" data-value="${option}">`;
-                button.addEventListener('click', () => checkAnswer(option, button));
-                
-                const imgElement = button.querySelector('img');
-                if (imgElement.src.endsWith('.png') || imgElement.src.endsWith('.gif')) {
-                    imgElement.style.animation = 'breathing 3s infinite ease-in-out';
-                }
-                optionsArea.appendChild(button);
-            });
-        }
-
-        function playSuccessAnimation() {
-            // 播放音效
-            if (fireworksSound) {
-                fireworksSound.currentTime = 0;
-                fireworksSound.play().catch(e => console.error("Audio play failed:", e));
-            }
-            
-            // 啟動全頁面煙火特效
-            createFireworks();
-
-            // 答對動畫
-            let finalImg = `<img class="final-answer-img" src="${numberblockImages[correctAnswer]}" alt="Answer ${correctAnswer}" style="height: 100%; object-fit: contain;">`;
-            answerPlaceholder.innerHTML = finalImg;
-            answerPlaceholder.style.backgroundColor = '#D4EDDA'; 
-            questionArea.classList.add('flash');
-
-            if (opValue === '+') {
-                // 加法：num2 瞬間向上跳躍並消失合體
-                num2Img.style.animation = 'jumpAndMerge 0.6s ease-out forwards';
-                num1Img.style.animation = 'flashSuccess 0.3s 3'; 
-            } else {
-                // 減法：num2 飛出，模擬分離
-                num2Img.style.animation = 'flyOut 0.8s ease-in forwards';
-                num1Img.style.animation = 'flashSuccess 0.3s 3'; 
-            }
-            
-            // 2 秒後 (短暫慶祝時間) 生成新題目
-            setTimeout(() => {
-                generateQuestion();
-                document.querySelectorAll('.option-button').forEach(btn => {
-                    btn.style.pointerEvents = 'auto';
-                });
-            }, 2000); 
-        }
-
-        function checkAnswer(selectedAnswer, button) {
-            document.querySelectorAll('.option-button').forEach(btn => {
-                btn.style.pointerEvents = 'none';
-            });
-            document.querySelectorAll('.option-button').forEach(btn => {
-                btn.classList.remove('wrong');
-                const wrongIndicator = btn.querySelector('.wrong-indicator');
-                if (wrongIndicator) wrongIndicator.remove();
-            });
-
-            if (selectedAnswer === correctAnswer) {
-                button.classList.add('correct');
-                updateScore(1);
-                playSuccessAnimation();
-            } else {
-                button.classList.add('wrong');
-                const wrongIndicator = document.createElement('div');
-                wrongIndicator.classList.add('wrong-indicator');
-                wrongIndicator.textContent = '❌';
-                button.appendChild(wrongIndicator);
-                
-                document.querySelectorAll('.option-button').forEach(btn => {
-                    btn.style.pointerEvents = 'auto';
-                });
-            }
-        }
-
-        // 頁面載入時
-        document.addEventListener('DOMContentLoaded', () => {
-            preloadAllImages();
-            updateScore(0);
-            generateQuestion();
-        });
-
-    </script>
-</body>
-</html>
+            if (num2Img
