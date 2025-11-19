@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Numberblocks Math Fun! (手機修正版)</title>
+    <title>Numberblocks Math Fun! (Mobile Final)</title>
     <style>
         /* 基礎樣式和響應式排版 */
         body {
@@ -11,11 +11,14 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            /* 修正：確保填滿整個視窗高度 */
+            height: 100vh;
             background: linear-gradient(to bottom, #87CEEB, #B0E0E6);
             margin: 0;
-            /* 修正：移除 overflow: hidden; 避免內容被裁切 */
             position: relative;
+            /* 修正：允許內容在必要時滾動，以防萬一 */
+            overflow-y: auto; 
+            overflow-x: hidden;
         }
         
         /* 雲朵動畫 (背景裝飾) */
@@ -35,26 +38,26 @@
             100% { transform: translateX(105vw); }
         }
 
-        /* 遊戲主容器 - 核心修正：適應手機並避免截斷 */
+        /* 遊戲主容器 - 核心修正：佔據約 80% 的視窗空間 */
         .game-container {
             background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 25px;
-            padding: 2vmin;
+            border-radius: 30px; /* 圓角更大 */
+            padding: 4vmin; /* 內邊距增加，內容更開放 */
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
             text-align: center;
-            /* 修正：佔據更穩定的 95% 寬度 */
-            width: 95%;
+            width: 95%; /* 佔據大部分寬度 */
             max-width: 90vh; 
-            max-height: 90vh;
+            min-height: 90vh; /* 確保佔據足夠垂直空間 */
             display: flex;
             flex-direction: column;
-            gap: 2vmin;
+            gap: 3vmin;
             position: relative;
             z-index: 10;
         }
 
         .title {
-            font-size: 5vmin;
+            /* 調整：字體大小適中 */
+            font-size: 6vmin;
             color: #FF5733;
             text-shadow: 2px 2px 3px rgba(0,0,0,0.2);
             font-weight: bold;
@@ -62,33 +65,33 @@
         
         /* 計分板樣式 */
         #scoreDisplay {
-            font-size: 3.5vmin;
+            /* 調整：字體放大 */
+            font-size: 4vmin;
             font-weight: bold;
             color: #007BFF;
             margin-bottom: 2vmin;
             text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
         }
 
-        /* 題目區 - 核心修正：圖片尺寸縮回，適應手機寬度 */
+        /* 題目區 - 修正尺寸，避免溢出，提供空間 */
         .question-area {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 2vmin;
-            margin-bottom: 2vmin;
-            /* 修正：調整到適中的高度 */
-            min-height: 25vmin; 
+            gap: 4vmin; /* 間距增加 */
+            margin-bottom: 4vmin;
+            min-height: 35vmin; /* 確保足夠高度容納圖片 */
         }
 
         .question-area img {
-            /* 修正：圖片尺寸縮小，讓算式能容納在手機寬度內 */
+            /* 修正：圖片尺寸調整到適中，防止溢出 */
             height: 25vmin; 
             object-fit: contain;
             transition: transform 0.3s ease-out, opacity 0.5s;
             animation: none !important; 
         }
         
-        /* 靜態圖片的呼吸動畫 */
+        /* 靜態圖片的呼吸動畫 (不變) */
         @keyframes breathing {
             0% { transform: scale(1); }
             50% { transform: scale(1.02); } 
@@ -101,8 +104,8 @@
         }
 
         .question-area .operator, .question-area .equals {
-            /* 修正：運算符號縮小 */
-            font-size: 8vmin;
+            /* 修正：運算符號放大 */
+            font-size: 10vmin;
             font-weight: bold;
             color: #333;
         }
@@ -110,119 +113,72 @@
             /* 修正：問號區塊配合圖片尺寸 */
             width: 25vmin;
             height: 25vmin;
-            border: 2px dashed #999;
-            border-radius: 10px;
+            border: 3px dashed #FFC300; /* 邊框更突出 */
+            border-radius: 15px;
             display: flex;
             justify-content: center;
             align-items: center;
-            /* 修正：問號字體縮小 */
-            font-size: 8vmin;
+            font-size: 10vmin;
             color: #666;
             font-weight: bold;
             background-color: #f0f0f0;
             transition: background-color 0.3s;
         }
         
-        /* 選項區 */
+        /* 選項區 - 核心修改：垂直堆疊 */
         .options-area {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2vmin;
+            /* 移除 grid，改用 flex 垂直堆疊 */
+            display: flex;
+            flex-direction: column;
+            gap: 3vmin; /* 增加選項間隔 */
             margin-top: 2vmin;
+            flex-grow: 1; /* 佔據剩餘垂直空間 */
+            justify-content: flex-start;
         }
 
         .option-button {
-            border: 3px solid #FFC300;
-            border-radius: 15px;
-            padding: 1vmin;
+            border: 4px solid #FFC300; /* 邊框更粗，點擊目標更清晰 */
+            border-radius: 20px; 
+            padding: 2vmin;
             cursor: pointer;
             position: relative;
-            /* 修正：選項按鈕高度縮小，利用更多垂直空間 */
-            height: 18vmin; 
+            /* 讓每個選項佔據整個容器的寬度 */
+            width: 100%; 
+            /* 讓選項高度增加，圖片有空間展開 */
+            height: 22vmin; 
             display: flex;
             justify-content: center;
             align-items: center;
             transition: all 0.2s;
         }
+        .option-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
         .option-button img {
-            height: 90%;
+            height: 100%; /* 圖片在按鈕中充分展開 */
             object-fit: contain;
             animation: none !important;
         }
 
         /* --- 動態回饋與慶祝 (核心動畫) --- */
+        /* (動畫邏輯保持不變) */
+        @keyframes jumpAndMerge { 0% { transform: translateY(0); opacity: 1; } 50% { transform: translateY(-30px); opacity: 1; } 100% { transform: translateY(0); opacity: 0; } }
+        @keyframes flyOut { 0% { transform: translateX(0) scale(1); opacity: 1; } 100% { transform: translate(50px, -50px) scale(0.5); opacity: 0; } }
+        @keyframes flashSuccess { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .question-area.flash .final-answer-img { animation: flashSuccess 0.3s 3; }
         
-        /* 加法動態：第二個數字向上跳躍並消失合體 */
-        @keyframes jumpAndMerge {
-            0% { transform: translateY(0); opacity: 1; }
-            50% { transform: translateY(-30px); opacity: 1; }
-            100% { transform: translateY(0); opacity: 0; }
-        }
-
-        /* 減法動態：被減部分飛出 */
-        @keyframes flyOut {
-            0% { transform: translateX(0) scale(1); opacity: 1; }
-            100% { transform: translate(50px, -50px) scale(0.5); opacity: 0; }
-        }
-
-        /* 答對後閃爍效果 */
-        @keyframes flashSuccess {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .question-area.flash .final-answer-img {
-            animation: flashSuccess 0.3s 3;
-        }
-
         /* --- 全頁面煙火粒子動畫 --- */
-        .fireworks-container {
-            position: fixed; /* 固定在視窗上 */
-            top: 0;
-            left: 0;
-            width: 100vw; /* 覆蓋整個視窗寬度 */
-            height: 100vh; /* 覆蓋整個視窗高度 */
-            z-index: 20;
-            pointer-events: none;
-            overflow: hidden; /* 確保粒子不會超出視窗 */
-        }
-
-        @keyframes firework {
-            0% { transform: translate(0, 0) scale(1); opacity: 1; }
-            100% { transform: translate(var(--x), var(--y)) scale(0) rotate(360deg); opacity: 0; }
-        }
-
-        .firework {
-            position: absolute;
-            width: 8px; /* 粒子更大 */
-            height: 8px; /* 粒子更大 */
-            border-radius: 50%;
-            background: var(--color);
-            box-shadow: 0 0 8px var(--color); /* 光暈更大 */
-            animation: firework 2s ease-out forwards;
-        }
+        .fireworks-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 20; pointer-events: none; overflow: hidden; }
+        @keyframes firework { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(var(--x), var(--y)) scale(0) rotate(360deg); opacity: 0; } }
+        .firework { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: var(--color); box-shadow: 0 0 8px var(--color); animation: firework 2s ease-out forwards; }
         
         /* 答錯的紅叉叉 (不變) */
-        .wrong-indicator {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 4em;
-            color: #F44336;
-            font-weight: bold;
-            z-index: 10;
-            animation: popIn 0.3s ease-out forwards;
-        }
-        @keyframes popIn {
-            from { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-        }
+        .wrong-indicator { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4em; color: #F44336; font-weight: bold; z-index: 10; animation: popIn 0.3s ease-out forwards; }
+        @keyframes popIn { from { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
 
-        /* 圖片預載入 */
-        #preload-images {
-            display: none;
-        }
+        #preload-images { display: none; }
 
     </style>
 </head>
@@ -257,7 +213,7 @@
     <audio id="fireworksSound" src="fireworks.mp3" preload="auto"></audio>
 
     <script>
-        // *** 圖片連結：已修正為本地檔案路徑 ***
+        // *** 圖片連結：使用本地檔案路徑 (最穩定) ***
         const numberblockImages = {
             1: '1.png', 
             2: '2.png',
