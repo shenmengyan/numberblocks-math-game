@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Numberblocks Math Fun! (Final Build Local)</title>
+    <title>Numberblocks Math Fun! (手機修正版)</title>
     <style>
         /* 基礎樣式和響應式排版 */
         body {
@@ -14,7 +14,7 @@
             min-height: 100vh;
             background: linear-gradient(to bottom, #87CEEB, #B0E0E6);
             margin: 0;
-            overflow: hidden;
+            /* 修正：移除 overflow: hidden; 避免內容被裁切 */
             position: relative;
         }
         
@@ -35,15 +35,16 @@
             100% { transform: translateX(105vw); }
         }
 
-        /* 遊戲主容器 - 佔據約 80% 的視窗空間 */
+        /* 遊戲主容器 - 核心修正：適應手機並避免截斷 */
         .game-container {
             background-color: rgba(255, 255, 255, 0.9);
             border-radius: 25px;
-            padding: 2vmin; 
+            padding: 2vmin;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
             text-align: center;
-            width: 85%;
-            max-width: 80vh; 
+            /* 修正：佔據更穩定的 95% 寬度 */
+            width: 95%;
+            max-width: 90vh; 
             max-height: 90vh;
             display: flex;
             flex-direction: column;
@@ -68,20 +69,20 @@
             text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
         }
 
-        /* 題目區 - 核心放大區域 (200%!) */
+        /* 題目區 - 核心修正：圖片尺寸縮回，適應手機寬度 */
         .question-area {
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 2vmin;
             margin-bottom: 2vmin;
-            /* 調整：讓整體高度增加 (22vmin * 2 = 44vmin) */
-            min-height: 44vmin; 
+            /* 修正：調整到適中的高度 */
+            min-height: 25vmin; 
         }
 
         .question-area img {
-            /* 調整：圖片尺寸放大 200% */
-            height: 44vmin; 
+            /* 修正：圖片尺寸縮小，讓算式能容納在手機寬度內 */
+            height: 25vmin; 
             object-fit: contain;
             transition: transform 0.3s ease-out, opacity 0.5s;
             animation: none !important; 
@@ -100,22 +101,22 @@
         }
 
         .question-area .operator, .question-area .equals {
-            /* 調整：運算符號放大 (8vmin * 2 = 16vmin) */
-            font-size: 16vmin;
+            /* 修正：運算符號縮小 */
+            font-size: 8vmin;
             font-weight: bold;
             color: #333;
         }
         .question-area .placeholder {
-            /* 調整：問號區塊配合圖片放大 (22vmin * 2 = 44vmin) */
-            width: 44vmin;
-            height: 44vmin;
+            /* 修正：問號區塊配合圖片尺寸 */
+            width: 25vmin;
+            height: 25vmin;
             border: 2px dashed #999;
             border-radius: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
-            /* 調整：問號字體放大 (8vmin * 2 = 16vmin) */
-            font-size: 16vmin;
+            /* 修正：問號字體縮小 */
+            font-size: 8vmin;
             color: #666;
             font-weight: bold;
             background-color: #f0f0f0;
@@ -136,8 +137,8 @@
             padding: 1vmin;
             cursor: pointer;
             position: relative;
-            /* 保持選項按鈕高度不變，避免擠壓 (25vmin) */
-            height: 25vmin; 
+            /* 修正：選項按鈕高度縮小，利用更多垂直空間 */
+            height: 18vmin; 
             display: flex;
             justify-content: center;
             align-items: center;
