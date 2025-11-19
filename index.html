@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Numberblocks Math Fun! (Final Build Local)</title>
+    <style>
+        /* 基礎樣式和響應式排版 */
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(to bottom, #87CEEB, #B0E0E6);
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* 雲朵動畫 (背景裝飾) */
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: moveClouds 20s infinite linear;
+        }
+        .cloud:nth-child(1) { width: 10vw; height: 6vw; top: 10%; left: -5vw; animation-delay: 0s; }
+        .cloud:nth-child(2) { width: 12vw; height: 7vw; top: 20%; right: -6vw; animation-delay: 5s; }
+        .cloud:nth-child(3) { width: 8vw; height: 5vw; top: 30%; left: -4vw; animation-delay: 10s; }
+        .cloud:nth-child(4) { width: 11vw; height: 6.5vw; top: 5%; left: 30%; animation-delay: 15s; }
+        @keyframes moveClouds {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(105vw); }
+        }
+
+        /* 遊戲主容器 - 使用 VMAX 響應式單位 */
+        .game-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 25px;
+            padding: 3vmin;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 90%;
+            max-width: 450px;
+            display: flex;
+            flex-direction: column;
+            gap: 2vmin;
+            position: relative;
+            z-index: 10;
+        }
+
+        .title {
+            font-size: 5vmin;
+            color: #FF5733;
+            text-shadow: 2px 2px 3px rgba(0,0,0,0.2);
+            font-weight: bold;
+        }
+        
+        /* 計分板樣式 */
+        #scoreDisplay {
+            font-size: 3.5vmin;
+            font-weight: bold;
+            color: #007BFF;
+            margin-bottom: 2vmin;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+        }
+
+        /* 題目區 - 優先最大化圖片空間 */
+        .question-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2vmin;
+            margin-bottom: 2vmin;
+            min-height: 15vmin; 
+        }
+
+        .question-area img {
+            height: 15vmin;
+            object-fit: contain;
+            transition: transform 0.3s ease-out, opacity 0.5s;
+            animation: none !important; 
+        }
+        
+        /* 靜態 PNG 圖片的呼吸動畫 */
+        @keyframes breathing {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); } 
+            100% { transform: scale(1); }
+        }
+        /* 只對靜態圖片應用 breathing */
+        .question-area img[src$=".png"], .option-button img[src$=".png"], 
+        .question-area img[src$=".gif"], .option-button img[src$=".gif"] {
+             animation: breathing 3s infinite ease-in-out; 
+        }
+
+        .question-area .operator, .question-area .equals {
+            font-size: 6vmin;
+            font-weight: bold;
+            color: #333;
+        }
+        .question-area .placeholder {
+            width: 15vmin;
+            height: 15vmin;
+            border: 2px dashed #999;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 6vmin;
+            color: #666;
+            font-weight: bold;
+            background-color: #f0f0f0;
+            transition: background-color 0.3s;
+        }
+        
+        /* 選項區 */
+        .options-area {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2vmin;
+            margin-top: 2vmin;
+        }
+
+        .option-button {
+            border: 3px solid #FFC300;
+            border-radius: 15px;
+            padding: 1vmin;
+            cursor: pointer;
+            position: relative;
+            height: 20vmin;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        .option-button img {
+            height: 90%;
+            object-fit: contain;
+            animation: none !important;
+        }
+
+        /* --- 動態回饋與慶祝 (核心動畫) --- */
+        
+        /* 加法動態：第二個數字向上跳躍並消失合體 */
+        @keyframes jumpAndMerge {
+            0% { transform: translateY(0); opacity: 1; }
+            50% { transform: translateY(-30px); opacity: 1; }
+            100% { transform: translateY(0); opacity: 0; }
+        }
+
+        /* 減法動態：被減部分飛出 */
+        @keyframes flyOut {
+            0% { transform: translateX(0) scale(1); opacity: 1; }
+            100% { transform: translate(50px, -50px) scale(0.5); opacity: 0; }
+        }
+
+        /* 答對後閃爍效果 */
+        @keyframes flashSuccess {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .question-area.flash .final-answer-img {
+            animation: flashSuccess 0.3s 3;
+        }
+
+        /* --- 全頁面煙火粒子動畫 --- */
+        .fireworks-container {
+            position: fixed; /* 固定在視窗上 */
+            top: 0;
+            left: 0;
+            width: 100vw; /* 覆蓋整個視窗寬度 */
+            height: 100vh; /* 覆蓋整個視窗高度 */
+            z-index: 20;
+            pointer-events: none;
+            overflow: hidden; /* 確保粒子不會超出視窗 */
+        }
+
+        @keyframes firework {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--x), var(--y)) scale(0) rotate(360deg); opacity: 0; }
+        }
+
+        .firework {
+            position: absolute;
+            width: 8px; /* 粒子更大 */
+            height: 8px; /* 粒子更大 */
+            border-radius: 50%;
+            background: var(--color);
+            box-shadow: 0 0 8px var(--color); /* 光暈更大 */
+            animation: firework 2s ease-out forwards;
+        }
+        
+        /* 答錯的紅叉叉 (不變) */
+        .wrong-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4em;
+            color: #F44336;
+            font-weight: bold;
+            z-index: 10;
+            animation: popIn 0.3s ease-out forwards;
+        }
+        @keyframes popIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        /* 圖片預載入 */
+        #preload-images {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+    
+    <div class="cloud"></div>
+    <div class="cloud"></div>
+    <div class="cloud"></div>
+    <div class="cloud"></div>
+
+    <div id="fireworksContainer" class="fireworks-container"></div>
+
+    <div class="game-container">
+        <div class="title">NUMBERBLOCKS MATH FUN!</div>
+        
+        <div id="scoreDisplay">分數: 0</div> 
+
+        <div class="question-area" id="questionArea">
+            <img id="num1Img" src="" alt="Numberblock 1">
+            <span class="operator" id="operator">+</span>
+            <img id="num2Img" src="" alt="Numberblock 2">
+            <span class="equals">=</span>
+            <div class="placeholder" id="answerPlaceholder">?</div>
+        </div>
+
+        <div class="options-area" id="optionsArea">
+        </div>
+    </div>
+
+    <div id="preload-images"></div>
+
+    <audio id="fireworksSound" src="fireworks.mp3" preload="auto"></audio>
+
+    <script>
+        // *** 圖片連結：全部切換為本地檔案路徑 ***
+        const numberblockImages = {
+            1: '1.png', 
+            2: '2.png',
+            3: '3.png',
+            4: '4.png',
+            5: '5.png',
+            6: '6.png',
+            7: '7.png',
+            8: '8.png',
+            9: '9.png',
+            10: '10.png'
+        };
+
+        const questionArea = document.getElementById('questionArea');
+        const optionsArea = document.getElementById('optionsArea');
+        const num1Img = document.getElementById('num1Img');
+        const num2Img = document.getElementById('num2Img');
+        const operatorSpan = document.getElementById('operator');
+        const answerPlaceholder = document.getElementById('answerPlaceholder');
+        const fireworksSound = document.getElementById('fireworksSound');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const fireworksContainer = document.getElementById('fireworksContainer');
+        
+        let correctAnswer = 0;
+        let num1Value = 0;
+        let num2Value = 0;
+        let opValue = '';
+        let score = 0;
+
+        // --- 全頁面煙火動畫函式 (功能不變) ---
+        function createFireworks() {
+            const colors = ['#FFC300', '#FF5733', '#C70039', '#900C3F', '#581845', '#00BFFF', '#32CD32', '#FF69B4'];
+            const numBursts = 5; 
+            const particlesPerBurst = 40; 
+            
+            fireworksContainer.innerHTML = '';
+
+            for (let b = 0; b < numBursts; b++) {
+                const startX = Math.random() * window.innerWidth;
+                const startY = Math.random() * window.innerHeight * 0.7;
+                
+                for (let i = 0; i < particlesPerBurst; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'firework';
+                    
+                    const angle = Math.random() * 360;
+                    const distance = Math.random() * 250 + 100;
+                    const x = Math.cos(angle * Math.PI / 180) * distance;
+                    const y = Math.sin(angle * Math.PI / 180) * distance;
+                    
+                    particle.style.left = `${startX}px`;
+                    particle.style.top = `${startY}px`;
+                    
+                    particle.style.setProperty('--x', `${x}px`);
+                    particle.style.setProperty('--y', `${y}px`);
+                    particle.style.setProperty('--color', colors[Math.floor(Math.random() * colors.length)]);
+                    
+                    particle.style.animationDelay = `${Math.random() * 0.8}s`;
+                    
+                    fireworksContainer.appendChild(particle);
+                }
+            }
+            
+            setTimeout(() => {
+                fireworksContainer.innerHTML = '';
+            }, 2000); 
+        }
+
+        // --- 遊戲核心邏輯 ---
+        function preloadAllImages() {
+            const preloadDiv = document.getElementById('preload-images');
+            for (const num in numberblockImages) {
+                const img = new Image();
+                img.src = numberblockImages[num];
+                preloadDiv.appendChild(img);
+            }
+        }
+        
+        function updateScore(points) {
+            score += points;
+            scoreDisplay.textContent = `分數: ${score}`;
+        }
+
+        function generateQuestion() {
+            questionArea.classList.remove('correct-answer', 'flash');
+            answerPlaceholder.innerHTML = '?'; 
+            answerPlaceholder.style.backgroundColor = '#f0f0f0'; 
+            num1Img.style.opacity = 1;
+            num2Img.style.opacity = 1;
+            
+            let num1, num2, op;
+            op = Math.random() < 0.5 ? '+' : '-';
+
+            if (op === '+') {
+                num1 = Math.floor(Math.random() * 9) + 1;
+                num2 = Math.floor(Math.random() * (10 - num1)) + 1;
+                correctAnswer = num1 + num2;
+            } else { 
+                num1 = Math.floor(Math.random() * 9) + 2; 
+                num2 = Math.floor(Math.random() * (num1 - 1)) + 1; 
+                correctAnswer = num1 - num2;
+            }
+            
+            num1Value = num1;
+            num2Value = num2;
+            opValue = op;
+
+            num1Img.src = numberblockImages[num1];
+            num2Img.src = numberblockImages[num2];
+            operatorSpan.textContent = op;
+
+            num1Img.style.animation = '';
+            num2Img.style.animation = '';
+            
+            // 由於全部都是本地路徑，我們只需判斷檔案類型
+            if (num1Img.src.endsWith('.png') || num1Img.src.endsWith('.gif')) { num1Img.style.animation = 'breathing 3s infinite ease-in-out'; }
+            if (num2Img.src.endsWith('.png') || num2Img.src.endsWith('.gif')) { num2Img.style.animation = 'breathing 3s infinite ease-in-out'; }
+
+
+            generateOptions(correctAnswer);
+        }
+
+        function generateOptions(correctAnswer) {
+            optionsArea.innerHTML = '';
+            document.querySelectorAll('.option-button').forEach(btn => {
+                btn.classList.remove('correct', 'wrong');
+                const wrongIndicator = btn.querySelector('.wrong-indicator');
+                if (wrongIndicator) wrongIndicator.remove();
+            });
+
+
+            let options = new Set();
+            options.add(correctAnswer); 
+
+            while (options.size < 3) {
+                let randomOption = Math.floor(Math.random() * 10) + 1; 
+                options.add(randomOption); 
+            }
+
+            let shuffledOptions = Array.from(options).sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('div');
+                button.classList.add('option-button');
+                button.innerHTML = `<img src="${numberblockImages[option]}" alt="Numberblock ${option}" data-value="${option}">`;
+                button.addEventListener('click', () => checkAnswer(option, button));
+                
+                const imgElement = button.querySelector('img');
+                if (imgElement.src.endsWith('.png') || imgElement.src.endsWith('.gif')) {
+                    imgElement.style.animation = 'breathing 3s infinite ease-in-out';
+                }
+                optionsArea.appendChild(button);
+            });
+        }
+
+        function playSuccessAnimation() {
+            // 播放音效
+            if (fireworksSound) {
+                fireworksSound.currentTime = 0;
+                fireworksSound.play().catch(e => console.error("Audio play failed:", e));
+            }
+            
+            // 啟動全頁面煙火特效
+            createFireworks();
+
+            // 答對動畫
+            let finalImg = `<img class="final-answer-img" src="${numberblockImages[correctAnswer]}" alt="Answer ${correctAnswer}" style="height: 100%; object-fit: contain;">`;
+            answerPlaceholder.innerHTML = finalImg;
+            answerPlaceholder.style.backgroundColor = '#D4EDDA'; 
+            questionArea.classList.add('flash');
+
+            if (opValue === '+') {
+                // 加法：num2 瞬間向上跳躍並消失合體
+                num2Img.style.animation = 'jumpAndMerge 0.6s ease-out forwards';
+                num1Img.style.animation = 'flashSuccess 0.3s 3'; 
+            } else {
+                // 減法：num2 飛出，模擬分離
+                num2Img.style.animation = 'flyOut 0.8s ease-in forwards';
+                num1Img.style.animation = 'flashSuccess 0.3s 3'; 
+            }
+            
+            // 2 秒後 (短暫慶祝時間) 生成新題目
+            setTimeout(() => {
+                generateQuestion();
+                document.querySelectorAll('.option-button').forEach(btn => {
+                    btn.style.pointerEvents = 'auto';
+                });
+            }, 2000); 
+        }
+
+        function checkAnswer(selectedAnswer, button) {
+            document.querySelectorAll('.option-button').forEach(btn => {
+                btn.style.pointerEvents = 'none';
+            });
+            document.querySelectorAll('.option-button').forEach(btn => {
+                btn.classList.remove('wrong');
+                const wrongIndicator = btn.querySelector('.wrong-indicator');
+                if (wrongIndicator) wrongIndicator.remove();
+            });
+
+            if (selectedAnswer === correctAnswer) {
+                button.classList.add('correct');
+                updateScore(1);
+                playSuccessAnimation();
+            } else {
+                button.classList.add('wrong');
+                const wrongIndicator = document.createElement('div');
+                wrongIndicator.classList.add('wrong-indicator');
+                wrongIndicator.textContent = '❌';
+                button.appendChild(wrongIndicator);
+                
+                document.querySelectorAll('.option-button').forEach(btn => {
+                    btn.style.pointerEvents = 'auto';
+                });
+            }
+        }
+
+        // 頁面載入時
+        document.addEventListener('DOMContentLoaded', () => {
+            preloadAllImages();
+            updateScore(0);
+            generateQuestion();
+        });
+
+    </script>
+</body>
+</html>
