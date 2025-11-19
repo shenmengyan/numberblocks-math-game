@@ -84,7 +84,7 @@
             animation: none !important; 
         }
         
-        /* 靜態 PNG 圖片的呼吸動畫 */
+        /* 靜態圖片的呼吸動畫 */
         @keyframes breathing {
             0% { transform: scale(1); }
             50% { transform: scale(1.02); } 
@@ -249,9 +249,8 @@
     <audio id="fireworksSound" src="fireworks.mp3" preload="auto"></audio>
 
     <script>
-        // *** 圖片連結：全部切換為本地檔案路徑 ***
+        // *** 圖片連結：已修正為本地檔案路徑 (最穩定) ***
         const numberblockImages = {
-            // 請確保這些檔案在您的 GitHub 倉庫中！
             1: '1.png', 
             2: '2.png',
             3: '3.png',
@@ -365,7 +364,6 @@
             num1Img.style.animation = '';
             num2Img.style.animation = '';
             
-            // 重新應用 PNG/靜態圖片的呼吸動畫
             if (num1Img.src.endsWith('.png') || num1Img.src.endsWith('.gif')) { num1Img.style.animation = 'breathing 3s infinite ease-in-out'; }
             if (num2Img.src.endsWith('.png') || num2Img.src.endsWith('.gif')) { num2Img.style.animation = 'breathing 3s infinite ease-in-out'; }
 
@@ -417,4 +415,64 @@
             createFireworks();
 
             // 答對動畫
-            let finalImg = `<img class="final-answer-img" src="${numberblockImages[correctAnswer]}" alt="Answer ${correctAnswer}" style="height: 100%; object-fit
+            let finalImg = `<img class="final-answer-img" src="${numberblockImages[correctAnswer]}" alt="Answer ${correctAnswer}" style="height: 100%; object-fit: contain;">`;
+            answerPlaceholder.innerHTML = finalImg;
+            answerPlaceholder.style.backgroundColor = '#D4EDDA'; 
+            questionArea.classList.add('flash');
+
+            if (opValue === '+') {
+                // 加法：num2 瞬間向上跳躍並消失合體
+                num2Img.style.animation = 'jumpAndMerge 0.6s ease-out forwards';
+                num1Img.style.animation = 'flashSuccess 0.3s 3'; 
+            } else {
+                // 減法：num2 飛出，模擬分離
+                num2Img.style.animation = 'flyOut 0.8s ease-in forwards';
+                num1Img.style.animation = 'flashSuccess 0.3s 3'; 
+            }
+            
+            // 2 秒後 (短暫慶祝時間) 生成新題目
+            setTimeout(() => {
+                generateQuestion();
+                document.querySelectorAll('.option-button').forEach(btn => {
+                    btn.style.pointerEvents = 'auto';
+                });
+            }, 2000); 
+        }
+
+        function checkAnswer(selectedAnswer, button) {
+            document.querySelectorAll('.option-button').forEach(btn => {
+                btn.style.pointerEvents = 'none';
+            });
+            document.querySelectorAll('.option-button').forEach(btn => {
+                btn.classList.remove('wrong');
+                const wrongIndicator = btn.querySelector('.wrong-indicator');
+                if (wrongIndicator) wrongIndicator.remove();
+            });
+
+            if (selectedAnswer === correctAnswer) {
+                button.classList.add('correct');
+                updateScore(1);
+                playSuccessAnimation();
+            } else {
+                button.classList.add('wrong');
+                const wrongIndicator = document.createElement('div');
+                wrongIndicator.classList.add('wrong-indicator');
+                wrongIndicator.textContent = '❌';
+                button.appendChild(wrongIndicator);
+                
+                document.querySelectorAll('.option-button').forEach(btn => {
+                    btn.style.pointerEvents = 'auto';
+                });
+            }
+        }
+
+        // 頁面載入時
+        document.addEventListener('DOMContentLoaded', () => {
+            preloadAllImages();
+            updateScore(0);
+            generateQuestion();
+        });
+
+    </script>
+</body>
+</html>
