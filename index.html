@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Numberblocks 數學派對</title>
+    <title>Numberblocks 千荷的數學派對</title>
     <style>
         /* 基礎設定 */
         body {
@@ -24,21 +24,46 @@
 
         h1 {
             color: #01579b;
-            margin: 10px 0;
-            font-size: 26px;
+            margin: 5px 0;
+            font-size: 24px;
             text-shadow: 2px 2px white;
         }
+
+        /* === 計分板樣式 === */
+        .scoreboard {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: #fff;
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 3px solid #fbc02d;
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 0 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            z-index: 100;
+        }
+        .score-num {
+            color: #e91e63;
+            font-size: 24px;
+        }
+        /* ================= */
 
         /* 遊戲主容器 */
         .game-container {
             background: rgba(255, 255, 255, 0.95);
-            padding: 15px;
+            padding: 10px;
             border-radius: 25px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
             text-align: center;
             width: 90%;
             max-width: 500px;
             border: 6px solid #fff;
+            margin-top: 10px;
         }
 
         /* 題目區域 */
@@ -46,13 +71,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 5px;
-            margin: 15px 0;
+            gap: 2px;
+            margin: 10px 0;
             min-height: 130px;
         }
 
         .symbol {
-            font-size: 40px;
+            font-size: 36px;
             font-weight: 900;
             color: #555;
             margin: 0 2px;
@@ -68,9 +93,9 @@
         }
 
         .number-label {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: bold;
-            margin-top: 5px;
+            margin-top: 0px;
             color: #333;
         }
 
@@ -85,16 +110,16 @@
         .options-area {
             display: flex;
             justify-content: center;
-            gap: 12px;
-            margin-top: 20px;
+            gap: 10px;
+            margin-top: 15px;
         }
 
         .option-btn {
             background-color: #fff;
             border: 4px solid #fbc02d;
             border-radius: 20px;
-            width: 90px;
-            height: 120px; /* 高度足夠放圖片和數字 */
+            width: 85px;
+            height: 115px;
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
@@ -103,12 +128,13 @@
             justify-content: center;
             padding: 5px;
             box-shadow: 0 4px #f9a825;
+            -webkit-tap-highlight-color: transparent; /* 移除點擊藍框 */
         }
 
         .option-btn img {
-            height: 70px;
+            height: 65px;
             width: auto;
-            max-width: 70px;
+            max-width: 65px;
             object-fit: contain;
             margin-bottom: 5px;
         }
@@ -124,7 +150,7 @@
             box-shadow: 0 1px #f9a825;
         }
 
-        /* 0 的空框框 */
+        /* 0 圖片讀取失敗時的備用框 */
         .empty-box {
             width: 60px;
             height: 60px;
@@ -147,20 +173,47 @@
             margin-bottom: 5px;
         }
 
-        /* 動畫特效 */
+        /* 特效層 */
+        #effects-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 50;
+        }
+
+        .confetti {
+            position: absolute;
+            top: -50px;
+            font-size: 30px;
+            animation: fall 3s linear infinite;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(110vh) rotate(720deg); }
+        }
+
+        /* 彈出動畫 */
         @keyframes pop {
             0% { transform: scale(0.5); opacity: 0; }
             80% { transform: scale(1.1); }
             100% { transform: scale(1); opacity: 1; }
         }
-        .pop-in { animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-
-        .confetti { position: absolute; top: -50px; font-size: 30px; animation: fall 3s linear infinite; z-index: 10; }
-        @keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
+        .pop-in {
+            animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
 
     </style>
 </head>
 <body>
+
+    <!-- 計分板 -->
+    <div class="scoreboard">
+        ⭐ 得分: <span id="score" class="score-num">0</span>
+    </div>
 
     <div id="effects-container"></div>
 
@@ -185,39 +238,42 @@
 
             <div class="symbol">=</div>
             
-            <!-- 問號 -->
             <div class="symbol" style="color:#e91e63; font-size:50px;">?</div>
         </div>
 
-        <!-- 選項按鈕 -->
+        <!-- 選項區 -->
         <div class="options-area" id="options-container"></div>
     </div>
 
     <script>
         // ==========================================
-        // 圖片設定：直接讀取當前資料夾的圖片
+        // 音效設定 (使用 Google 的免費音效連結)
         // ==========================================
-        const imagePath = ""; // 空字串代表 "同一層資料夾"
-        const imageExtension = ".png"; 
+        const correctSound = new Audio("https://actions.google.com/sounds/v1/cartoon/magic_wand_1.ogg");
+        const wrongSound = new Audio("https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg");
         
-        function getImagePath(num) {
-            return imagePath + num + imageExtension;
-        }
+        // 預先載入音效，避免第一次點擊沒聲音
+        correctSound.load();
+        wrongSound.load();
+        // ==========================================
 
         let currentAnswer = 0;
+        let score = 0;
         const positivePhrases = ["好棒喔！", "答對了！", "太厲害了！", "做得好！", "Bingo!"];
 
-        // 產生圖片 HTML
-        function getCharacterHtml(num) {
-            if (num === 0) {
-                return `<div class="empty-box pop-in">0</div>`;
-            } else {
-                // onerror 用於處理圖片讀取失敗時（例如還沒放圖片），自動顯示文字數字
-                return `<img src="${getImagePath(num)}" class="nb-character pop-in" alt="${num}" onerror="this.style.display='none';this.parentElement.innerText='${num}'">`;
-            }
+        // 產生圖片 HTML (現在 0 也會嘗試讀取圖片)
+        function getImgTag(num, isSmall = false) {
+            // 設定 CSS class
+            let className = isSmall ? '' : 'nb-character pop-in';
+            let style = isSmall ? 'style="height:65px;max-width:65px;object-fit:contain;margin-bottom:5px;"' : '';
+            
+            // 不管是不是 0，都先嘗試讀取 .png
+            // 如果失敗 (onerror)，嘗試 .PNG
+            // 如果還是失敗，則隱藏圖片並顯示文字數字
+            return `<img src="${num}.png" class="${className}" ${style} alt="${num}" 
+                    onerror="this.onerror=null; this.src='${num}.PNG'; this.nextElementSibling ? this.nextElementSibling.style.display='block' : null; if(this.src.includes('PNG')) { this.onerror = function(){ this.style.display='none'; if(this.parentElement) this.parentElement.innerText='${num}'; } }">`;
         }
 
-        // 產生新題目
         function newQuestion() {
             document.getElementById('effects-container').innerHTML = '';
             document.getElementById('message').innerText = " "; 
@@ -225,31 +281,30 @@
             let isAddition = Math.random() > 0.5;
             let num1, num2;
 
+            // 題目邏輯
             if (isAddition) {
-                // 加法
                 num1 = Math.floor(Math.random() * 6); // 0-5
                 num2 = Math.floor(Math.random() * (11 - num1)); 
                 if (num1 === 0 && num2 === 0) num2 = 1; 
                 currentAnswer = num1 + num2;
                 document.getElementById('op-symbol').innerText = '+';
             } else {
-                // 減法
                 num1 = Math.floor(Math.random() * 10) + 1; // 1-10
                 num2 = Math.floor(Math.random() * (num1 + 1)); 
                 currentAnswer = num1 - num2;
                 document.getElementById('op-symbol').innerText = '-';
             }
 
-            document.getElementById('img-left').innerHTML = getCharacterHtml(num1);
+            // 更新題目區
+            document.getElementById('img-left').innerHTML = getImgTag(num1);
             document.getElementById('num-left').innerText = num1;
             
-            document.getElementById('img-right').innerHTML = getCharacterHtml(num2);
+            document.getElementById('img-right').innerHTML = getImgTag(num2);
             document.getElementById('num-right').innerText = num2;
 
             generateOptions(currentAnswer);
         }
 
-        // 產生選項按鈕（包含圖片和數字）
         function generateOptions(correct) {
             let container = document.getElementById('options-container');
             container.innerHTML = '';
@@ -268,13 +323,8 @@
                 let btn = document.createElement('button');
                 btn.className = 'option-btn';
                 
-                // 按鈕內容：上圖下字
-                let imgHtml;
-                if (num === 0) {
-                     imgHtml = '<div class="empty-box" style="width:50px;height:50px;font-size:20px;margin-bottom:5px;">0</div>';
-                } else {
-                     imgHtml = `<img src="${getImagePath(num)}" alt="${num}" onerror="this.style.display='none'">`;
-                }
+                // 按鈕內部：圖片 + 數字
+                let imgHtml = getImgTag(num, true); // true 代表這是小圖標
                 
                 btn.innerHTML = `${imgHtml}<span>${num}</span>`;
                 btn.onclick = () => checkAnswer(num, btn);
@@ -282,11 +332,21 @@
             });
         }
 
-        // 檢查答案
         function checkAnswer(selected, btnElement) {
             let msgDiv = document.getElementById('message');
+            let scoreSpan = document.getElementById('score');
             
             if (selected === currentAnswer) {
+                // === 答對 ===
+                // 1. 更新分數
+                score++;
+                scoreSpan.innerText = score;
+
+                // 2. 播放音效
+                correctSound.currentTime = 0; // 重置音效時間，確保連點可以播放
+                correctSound.play().catch(e => console.log("Audio play blocked:", e));
+
+                // 3. 顯示訊息與動畫
                 let phrase = positivePhrases[Math.floor(Math.random() * positivePhrases.length)];
                 msgDiv.innerText = `${phrase}`;
                 msgDiv.style.color = "#4CAF50";
@@ -296,19 +356,28 @@
                 btnElement.style.transform = "scale(1.1)";
                 
                 createConfetti();
+                
+                // 4. 延遲後換下一題
                 setTimeout(newQuestion, 2000); 
             } else {
+                // === 答錯 ===
+                // 1. 播放音效
+                wrongSound.currentTime = 0;
+                wrongSound.play().catch(e => console.log("Audio play blocked:", e));
+
+                // 2. 顯示訊息與樣式
                 msgDiv.innerText = "再試試看？";
                 msgDiv.style.color = "#ff7043";
-                btnElement.style.opacity = "0.5";
-                btnElement.disabled = true;
+                btnElement.style.opacity = "0.6";
+                btnElement.style.backgroundColor = "#eee";
+                btnElement.disabled = true; // 禁用錯誤按鈕
             }
         }
 
         function createConfetti() {
-            const emojis = ['⭐', '🎈', '✨', '🎉'];
+            const emojis = ['⭐', '🎈', '✨', '🎉', '100', '🍬'];
             const container = document.getElementById('effects-container');
-            for (let i = 0; i < 20; i++) {
+            for (let i = 0; i < 25; i++) {
                 const el = document.createElement('div');
                 el.innerText = emojis[Math.floor(Math.random() * emojis.length)];
                 el.className = 'confetti';
@@ -318,7 +387,7 @@
             }
         }
 
-        // 啟動
+        // 啟動遊戲
         newQuestion();
 
     </script>
