@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Numberblocks Math Fun! (Final UX Standard)</title>
+    <title>Numberblocks Math Fun! (Final UX Polish)</title>
     <style>
-        /* 基礎樣式和全局設置 */
+        /* 基礎樣式和響應式排版 */
         body {
             font-family: 'Arial', sans-serif;
             display: flex;
@@ -36,7 +36,7 @@
             100% { transform: translateX(105vw); }
         }
 
-        /* 遊戲主容器 - 使用 FLEX 佈局實現分數推到底部 */
+        /* 遊戲主容器 - 佔據約 80% 的視窗空間 */
         .game-container {
             background-color: rgba(255, 255, 255, 0.9);
             border-radius: 30px; 
@@ -45,7 +45,8 @@
             text-align: center;
             width: 95%;
             max-width: 90vh; 
-            min-height: 90vh;
+            /* 修正：將 min-height 設為 98vh，讓白色區域幾乎填滿螢幕高度 */
+            min-height: 98vh; 
             display: flex;
             flex-direction: column;
             gap: 3vmin;
@@ -53,27 +54,24 @@
             z-index: 10;
         }
 
-        /* 自適應字體 (clamp) */
         .title {
-            /* 標題：24px - 32px */
             font-size: clamp(24px, 6vmin, 32px);
             color: #FF5733;
             text-shadow: 2px 2px 3px rgba(0,0,0,0.2);
             font-weight: bold;
         }
         
-        /* 計分板樣式 - 移到底部 */
+        /* 計分板樣式 - 位於底部 */
         #scoreDisplay {
-            /* 分數：20px - 24px */
             font-size: clamp(20px, 4vmin, 24px);
             font-weight: bold;
             color: #007BFF;
-            margin-top: auto; /* 核心：將分數推到底部 */
+            margin-top: auto; 
             margin-bottom: 2vmin;
             text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
         }
 
-        /* 題目區 - 圖片尺寸優化 */
+        /* 題目區 - 核心調整：圖片尺寸優化 */
         .question-area {
             display: flex;
             justify-content: center;
@@ -106,9 +104,7 @@
              animation: breathing 3s infinite ease-in-out; 
         }
 
-        /* 運算符號和問號字體 */
         .question-area .operator, .question-area .equals {
-            /* 題目：28px - 36px */
             font-size: clamp(28px, 10vmin, 36px);
             font-weight: bold;
             color: #333;
@@ -128,30 +124,28 @@
             transition: background-color 0.3s;
         }
         
-        /* 選項區 - 手機模式：橫排三列 (GRID) */
+        /* 選項區 - 橫排三列 (GRID) */
         .options-area {
             display: grid; 
             grid-template-columns: repeat(3, 1fr);
             gap: 3vmin; 
             margin-top: 2vmin;
+            flex-grow: 0; 
             justify-content: center;
         }
 
         .option-button {
-            /* UX 核心規範：按鈕最小尺寸 >= 96px */
             min-width: 96px;
             min-height: 96px; 
-            
-            /* 可點擊範圍外擴到 128px：透過邊距和 padding 實現 */
             padding: 4vmin; 
-            margin: 4px; /* 增加按鈕之間的實際間隔 */
+            margin: 4px; 
             
             border: 4px solid #FFC300; 
             border-radius: 20px; 
             cursor: pointer;
             position: relative;
-            /* 高度：確保圖片能容納 */
-            height: 25vmin; 
+            /* 修正：選項按鈕高度增加到 28vmin，讓圖片有更多空間 */
+            height: 28vmin; 
             display: flex;
             justify-content: center;
             align-items: center;
@@ -193,12 +187,11 @@
         /* --- 平板優化 (Media Query)：大於等於 1024px 切換 --- */
         @media (min-width: 1024px) {
             .game-container {
-                max-width: 900px; /* 平板最大寬度 */
+                max-width: 900px;
                 min-height: 80vh;
                 gap: 5vmin;
             }
             .question-area {
-                /* 平板：算式左右加大留白 */
                 padding: 0 50px; 
             }
             .options-area {
@@ -206,11 +199,10 @@
                 grid-template-columns: repeat(4, 1fr);
             }
             .option-button {
-                /* 平板：按鈕可以稍微降低高度，保持視覺比例 */
                 height: 20vmin; 
             }
         }
-        
+
         /* 圖片預載入 */
         #preload-images { display: none; }
 
@@ -230,7 +222,7 @@
         
         <div class="question-area" id="questionArea">
             <img id="num1Img" src="" alt="Numberblock 1">
-            <span class="operator" id="operator">+</span>
+            <span class="operator" id="operator">-</span>
             <img id="num2Img" src="" alt="Numberblock 2">
             <span class="equals">=</span>
             <div class="placeholder" id="answerPlaceholder">?</div>
