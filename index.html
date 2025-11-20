@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Numberblocks Math Fun! (Final Simple Animation)</title>
+    <title>Numberblocks Math Fun! (Final Pulse Animation)</title>
     <style>
         /* 基礎樣式和響應式排版 */
         body {
@@ -81,12 +81,11 @@
             position: relative;
         }
         .question-area .equals, .question-area .placeholder {
-            /* 保持移除 = 和 ? 號 */
             display: none; 
         }
 
         .question-area img {
-            height: 35vmin; /* 算式圖片大小 */
+            height: 30vmin; 
             object-fit: contain;
             transition: transform 0.3s ease-out, opacity 0.5s;
             animation: none !important; 
@@ -113,9 +112,9 @@
             color: #333;
         }
 
-        /* --- 動畫舞台 (保留，用於答案放大) --- */
+        /* --- 動畫舞台：答案圖片在此放大脈衝 --- */
         #animationStage {
-            min-height: 35vmin; /* 給答案圖片足夠空間 */
+            min-height: 35vmin; 
             display: flex;
             justify-content: center;
             align-items: center;
@@ -123,29 +122,41 @@
             z-index: 15;
             margin-bottom: 5vmin;
         }
-        /* 答案圖片飛入中央舞台的動畫 */
-        @keyframes flyToCenter {
-            0% { transform: translate(var(--dx), var(--dy)) scale(1); opacity: 1; z-index: 50; }
-            50% { transform: translate(0, 0) scale(1.5); opacity: 1; } /* 飛到中心並放大 */
-            100% { transform: translate(0, 0) scale(1.5); opacity: 1; }
+        #answerImg {
+            /* 答案圖片預設樣式 */
+            height: 35vmin; /* 中央圖片尺寸 */
+            object-fit: contain;
+            transition: opacity 0.3s;
+            opacity: 0;
         }
-        .answer-flying {
-            animation: flyToCenter 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        
+        /* 新增：脈衝閃爍動畫 */
+        @keyframes pulseSuccess {
+            0% { transform: scale(1); opacity: 1; }
+            30% { transform: scale(1.15); opacity: 1; } /* 放大 */
+            70% { transform: scale(0.95); opacity: 1; } /* 縮小 */
+            100% { transform: scale(1); opacity: 1; } /* 恢復 */
+        }
+        .pulse-animation {
+            animation: pulseSuccess 0.8s ease-out 0s 2; /* 執行 2 次脈衝 */
         }
 
 
-        /* 選項區 - 核心修改：2x2 橫排兩欄 (GRID) */
+        /* 選項區 - 橫排三列 (GRID) */
         .options-area {
             display: grid; 
-            grid-template-columns: repeat(2, 1fr); /* 2x2 佈局 */
-            gap: 3vmin; 
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2vmin; 
             margin-top: 2vmin;
-            flex-grow: 1; 
             justify-content: center;
+        }
+        /* 答對後，選項區快速淡出 */
+        .options-area.fade-out {
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
         }
 
         .option-button {
-            /* UX 規範：最小 96px */
             min-width: 96px;
             min-height: 96px; 
             padding: 1vmin;
@@ -154,11 +165,11 @@
             border-radius: 20px; 
             cursor: pointer;
             position: relative;
-            height: 35vmin; /* 配合 2x2 佈局，高度較高 */
+            height: 22vmin; 
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: all 0.2s, opacity 0.5s; /* 新增 opacity 過渡 */
+            transition: all 0.2s, opacity 0.2s; /* 確保能快速消失 */
         }
         .option-button:hover {
             transform: translateY(-2px);
@@ -201,19 +212,21 @@
     <div class="game-container">
         <div class="title">NUMBERBLOCKS MATH FUN!</div>
         
+        <div id="scoreDisplay">分數: 0</div> 
+
         <div class="question-area" id="questionArea">
             <img id="num1Img" src="" alt="Numberblock 1">
             <span class="operator" id="operator">-"></span>
             <img id="num2Img" src="" alt="Numberblock 2">
-            </div>
+        </div>
         
         <div id="animationStage">
-            </div>
+            <img id="answerImg" src="" alt="Answer Block">
+        </div>
 
         <div class="options-area" id="optionsArea">
         </div>
         
-        <div id="scoreDisplay">分數: 0</div> 
     </div>
 
     <div id="preload-images"></div>
@@ -236,11 +249,12 @@
         const scoreDisplay = document.getElementById('scoreDisplay');
         const fireworksContainer = document.getElementById('fireworksContainer');
         const animationStage = document.getElementById('animationStage');
+        const answerImg = document.getElementById('answerImg'); 
         
         let correctAnswer = 0;
         let opValue = '';
         let score = 0;
-        const ANIMATION_DURATION = 800; // 0.8秒動畫
+        const ANIMATION_DURATION = 1000; // 1秒後出下一題
 
         // --- 全頁面煙火動畫函式 (功能不變) ---
         function createFireworks() {
@@ -272,13 +286,13 @@
             }, 2000); 
         }
 
-        // --- 遊戲核心邏輯 ---
+        // --- 遊戲核心邏輯 (部分省略) ---
         function preloadAllImages() { /* ... 不變 ... */ }
         function updateScore(points) { /* ... 不變 ... */ }
 
         function generateQuestion() {
-            animationStage.innerHTML = ''; // 清除舞台
-            optionsArea.style.opacity = 1; // 確保選項區可見
+            answerImg.style.opacity = 0; // 隱藏答案圖片
+            optionsArea.classList.remove('fade-out'); // 確保選項區可見
             
             let num1, num2, op;
             op = Math.random() < 0.5 ? '+' : '-';
@@ -307,12 +321,7 @@
         // 核心邏輯修改：生成 4 個選項
         function generateOptions(correctAnswer) {
             optionsArea.innerHTML = '';
-            document.querySelectorAll('.option-button').forEach(btn => {
-                btn.classList.remove('correct', 'wrong');
-                const wrongIndicator = btn.querySelector('.wrong-indicator');
-                if (wrongIndicator) wrongIndicator.remove();
-            });
-
+            
             let options = new Set();
             options.add(correctAnswer); 
             
@@ -325,10 +334,9 @@
 
             let shuffledOptions = Array.from(options).sort(() => Math.random() - 0.5);
 
-            shuffledOptions.forEach((option, index) => {
+            shuffledOptions.forEach(option => {
                 const button = document.createElement('div');
                 button.classList.add('option-button');
-                button.setAttribute('data-index', index); // 記錄按鈕的初始位置索引
                 button.innerHTML = `<img src="${numberblockImages[option]}" alt="Numberblock ${option}" data-value="${option}">`;
                 button.addEventListener('click', () => checkAnswer(option, button));
                 
@@ -340,55 +348,29 @@
             });
         }
 
-        // --- 核心：答案飛入中央動畫邏輯 ---
-        function playAnswerFlyIn(correctButton) {
-            // 1. 隱藏所有選項
-            const allOptions = document.querySelectorAll('.option-button');
-            allOptions.forEach(btn => {
-                if (btn !== correctButton) {
-                    btn.style.opacity = 0;
-                }
-            });
 
-            // 獲取正確按鈕和中央舞台的位置 (矩形)
-            const correctRect = correctButton.getBoundingClientRect();
-            const stageRect = animationStage.getBoundingClientRect();
-            const containerRect = document.querySelector('.game-container').getBoundingClientRect();
-            
-            // 計算移動距離 (從按鈕中心到舞台中心)
-            // 減去 containerRect.top 和 left 是為了讓 translate 相對於 container 居中
-            const dx = (stageRect.left + stageRect.width / 2) - (correctRect.left + correctRect.width / 2);
-            const dy = (stageRect.top + stageRect.height / 2) - (correctRect.top + correctRect.height / 2);
-            
-            // 將按鈕設定為絕對定位，並啟動飛入動畫
-            correctButton.style.position = 'absolute';
-            correctButton.style.left = `${correctRect.left - containerRect.left}px`;
-            correctButton.style.top = `${correctRect.top - containerRect.top}px`;
-            correctButton.style.margin = '0';
-            correctButton.style.zIndex = '100';
-
-            // 設定 CSS 變數並應用動畫
-            correctButton.style.setProperty('--dx', `${dx}px`);
-            correctButton.style.setProperty('--dy', `${dy}px`);
-            correctButton.classList.add('answer-flying');
-        }
-
-
-        function playSuccessAnimation(correctButton) {
+        // --- 核心：答案脈衝閃爍邏輯 ---
+        function playSuccessAnimation() {
             // 播放音效
             if (fireworksSound) {
                 fireworksSound.currentTime = 0;
                 fireworksSound.play().catch(e => console.error("Audio play failed:", e));
             }
             
+            // 1. 隱藏選項區，讓正確答案獨自放大
+            optionsArea.classList.add('fade-out');
+
+            // 2. 答案圖片出現在中央並開始脈衝
+            answerImg.src = numberblockImages[correctAnswer];
+            answerImg.style.opacity = 1;
+            answerImg.classList.add('pulse-animation');
+            
             // 啟動全頁面煙火特效
             createFireworks();
-            
-            // 啟動飛入動畫
-            playAnswerFlyIn(correctButton);
         
-            // 2 秒後 (動畫結束) 生成新題目
+            // 3. 清理與下一題 (ANIMATION_DURATION)
             setTimeout(() => {
+                answerImg.classList.remove('pulse-animation');
                 generateQuestion();
                 document.querySelectorAll('.option-button').forEach(btn => {
                     btn.style.pointerEvents = 'auto';
@@ -409,7 +391,7 @@
             if (selectedAnswer === correctAnswer) {
                 button.classList.add('correct');
                 updateScore(1);
-                playSuccessAnimation(button); // 傳入正確按鈕元素
+                playSuccessAnimation();
             } else {
                 button.classList.add('wrong');
                 const wrongIndicator = document.createElement('div');
@@ -425,6 +407,13 @@
 
         // 頁面載入時
         document.addEventListener('DOMContentLoaded', () => {
+            // 確保 answerImg 元素在 DOM 中
+            const existingAnswerImg = document.getElementById('answerImg');
+            if (!existingAnswerImg) {
+                // 如果您在 HTML 中沒有保留 answerImg，這裡需要確保它被初始化
+                // 由於 HTML 已經修正，這裡不用再重複創建
+            }
+
             preloadAllImages();
             updateScore(0);
             generateQuestion();
