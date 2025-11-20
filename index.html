@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Numberblocks Math Fun! (Final UX Polish)</title>
+    <title>Numberblocks Math Fun! (Final 2x2 Layout)</title>
     <style>
         /* 基礎樣式和響應式排版 */
         body {
@@ -45,7 +45,7 @@
             text-align: center;
             width: 95%;
             max-width: 90vh; 
-            min-height: 98vh; /* 確保佔滿垂直空間 */
+            min-height: 98vh; 
             display: flex;
             flex-direction: column;
             gap: 3vmin;
@@ -60,29 +60,31 @@
             font-weight: bold;
         }
         
-        /* 計分板樣式 - 移到底部並加上邊距避開手機 UI */
+        /* 計分板樣式 - 位於底部 */
         #scoreDisplay {
             font-size: clamp(20px, 4vmin, 24px);
             font-weight: bold;
             color: #007BFF;
             margin-top: auto; 
-            /* 修正：增加底部邊距，將分數上推，避開手機底部操作欄/手勢區 */
+            /* 增加底部邊距，將分數上推，避開手機底部操作欄/手勢區 */
             margin-bottom: 5vmin; 
             text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
         }
 
-        /* 題目區 - 核心調整：圖片尺寸優化 */
+        /* 題目區 - 核心調整：圖片尺寸放大 */
         .question-area {
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 4vmin; 
             margin-bottom: 4vmin;
-            min-height: 30vmin; 
+            /* 修正：配合 35vmin 圖片高度 */
+            min-height: 35vmin; 
         }
 
         .question-area img {
-            height: 30vmin; 
+            /* 修正：圖片尺寸放大到 35vmin */
+            height: 35vmin; 
             object-fit: contain;
             transition: transform 0.3s ease-out, opacity 0.5s;
             animation: none !important; 
@@ -105,31 +107,35 @@
         }
 
         .question-area .operator, .question-area .equals {
-            font-size: clamp(28px, 10vmin, 36px);
+            /* 運算符號等比例放大 */
+            font-size: 12vmin;
             font-weight: bold;
             color: #333;
         }
         .question-area .placeholder {
-            width: 30vmin;
-            height: 30vmin;
+            /* 答案框配合圖片尺寸 */
+            width: 35vmin;
+            height: 35vmin;
             border: 4px dashed #FFC300; 
             border-radius: 15px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: clamp(28px, 10vmin, 36px);
+            font-size: 12vmin;
             color: #666;
             font-weight: bold;
             background-color: #f0f0f0;
             transition: background-color 0.3s;
         }
         
-        /* 選項區 - 核心修改：橫排三列 (GRID) */
+        /* 選項區 - 核心修改：2x2 橫排兩欄 (GRID) */
         .options-area {
+            /* 調整：Grid 佈局改為兩欄 */
             display: grid; 
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2vmin; /* 修正：縮小間距，讓按鈕能容納 */
+            grid-template-columns: repeat(2, 1fr);
+            gap: 3vmin; 
             margin-top: 2vmin;
+            flex-grow: 1; /* 確保選項區域佔據主要空間 */
             justify-content: center;
         }
 
@@ -138,16 +144,15 @@
             min-width: 96px;
             min-height: 96px; 
             
-            /* 修正：縮小 padding，讓按鈕在橫向上有更多空間 */
-            padding: 1vmin; 
+            padding: 1vmin;
             margin: 4px; 
             
             border: 4px solid #FFC300; 
             border-radius: 20px; 
             cursor: pointer;
             position: relative;
-            /* 修正：選項按鈕高度縮小，防止溢出 */
-            height: 22vmin; 
+            /* 調整：選項按鈕高度，讓圖片有更多空間 */
+            height: 35vmin; 
             display: flex;
             justify-content: center;
             align-items: center;
@@ -197,6 +202,7 @@
                 padding: 0 50px; 
             }
             .options-area {
+                /* 平板：答案改四欄 */
                 grid-template-columns: repeat(4, 1fr);
             }
             .option-button {
@@ -362,6 +368,7 @@
             generateOptions(correctAnswer);
         }
 
+        // 核心邏輯修改：生成 4 個選項
         function generateOptions(correctAnswer) {
             optionsArea.innerHTML = '';
             document.querySelectorAll('.option-button').forEach(btn => {
@@ -373,8 +380,10 @@
 
             let options = new Set();
             options.add(correctAnswer); 
+            
+            const totalOptions = 4; // 調整：總選項數量為 4
 
-            while (options.size < 3) {
+            while (options.size < totalOptions) {
                 let randomOption = Math.floor(Math.random() * 10) + 1; 
                 options.add(randomOption); 
             }
