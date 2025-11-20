@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Numberblocks Math Fun! (Final Pulse Animation)</title>
+    <title>Numberblocks Math Fun! (Final 2x2 Layout)</title>
     <style>
         /* 基礎樣式和響應式排版 */
         body {
@@ -85,7 +85,7 @@
         }
 
         .question-area img {
-            height: 30vmin; 
+            height: 35vmin; /* 算式圖片大小 */
             object-fit: contain;
             transition: transform 0.3s ease-out, opacity 0.5s;
             animation: none !important; 
@@ -123,31 +123,34 @@
             margin-bottom: 5vmin;
         }
         #answerImg {
-            /* 答案圖片預設樣式 */
-            height: 35vmin; /* 中央圖片尺寸 */
+            height: 35vmin;
             object-fit: contain;
             transition: opacity 0.3s;
             opacity: 0;
         }
         
-        /* 新增：脈衝閃爍動畫 */
+        /* 脈衝閃爍動畫 */
         @keyframes pulseSuccess {
             0% { transform: scale(1); opacity: 1; }
-            30% { transform: scale(1.15); opacity: 1; } /* 放大 */
-            70% { transform: scale(0.95); opacity: 1; } /* 縮小 */
-            100% { transform: scale(1); opacity: 1; } /* 恢復 */
+            30% { transform: scale(1.15); opacity: 1; } 
+            70% { transform: scale(0.95); opacity: 1; } 
+            100% { transform: scale(1); opacity: 1; } 
         }
+        /* 脈衝動畫將在 JS 中動態應用 */
         .pulse-animation {
-            animation: pulseSuccess 0.8s ease-out 0s 2; /* 執行 2 次脈衝 */
+            /* 執行 2 次脈衝, 總時長 1.6秒 */
+            animation: pulseSuccess 0.8s ease-out 0s 2; 
         }
 
 
-        /* 選項區 - 橫排三列 (GRID) */
+        /* 選項區 - 核心修改：2x2 橫排兩欄 (GRID) */
         .options-area {
             display: grid; 
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2vmin; 
+            grid-template-columns: repeat(2, 1fr); /* 核心：2x2 佈局 */
+            gap: 3vmin; 
             margin-top: 2vmin;
+            /* 確保選項區佔用剩餘空間，推動分數區 */
+            flex-grow: 1; 
             justify-content: center;
         }
         /* 答對後，選項區快速淡出 */
@@ -157,6 +160,7 @@
         }
 
         .option-button {
+            /* UX 規範：最小 96px */
             min-width: 96px;
             min-height: 96px; 
             padding: 1vmin;
@@ -165,7 +169,7 @@
             border-radius: 20px; 
             cursor: pointer;
             position: relative;
-            height: 22vmin; 
+            height: 35vmin; /* 配合 2x2 佈局，高度較高 */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -195,7 +199,10 @@
         .firework { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: var(--color); box-shadow: 0 0 8px var(--color); animation: firework 2s ease-out forwards; }
         .wrong-indicator { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4em; color: #F44336; font-weight: bold; z-index: 10; animation: popIn 0.3s ease-out forwards; }
         @keyframes popIn { from { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
-        @media (min-width: 1024px) { /* ... CSS 保持不變 ... */ }
+        @media (min-width: 1024px) { 
+            .options-area { grid-template-columns: repeat(4, 1fr); }
+            .option-button { height: 20vmin; }
+        }
         #preload-images { display: none; }
 
     </style>
@@ -212,8 +219,6 @@
     <div class="game-container">
         <div class="title">NUMBERBLOCKS MATH FUN!</div>
         
-        <div id="scoreDisplay">分數: 0</div> 
-
         <div class="question-area" id="questionArea">
             <img id="num1Img" src="" alt="Numberblock 1">
             <span class="operator" id="operator">-"></span>
@@ -227,6 +232,7 @@
         <div class="options-area" id="optionsArea">
         </div>
         
+        <div id="scoreDisplay">分數: 0</div> 
     </div>
 
     <div id="preload-images"></div>
@@ -248,13 +254,12 @@
         const fireworksSound = document.getElementById('fireworksSound');
         const scoreDisplay = document.getElementById('scoreDisplay');
         const fireworksContainer = document.getElementById('fireworksContainer');
-        const animationStage = document.getElementById('animationStage');
         const answerImg = document.getElementById('answerImg'); 
         
         let correctAnswer = 0;
         let opValue = '';
         let score = 0;
-        const ANIMATION_DURATION = 1000; // 1秒後出下一題
+        const ANIMATION_TOTAL_DURATION = 2000; // 核心：總停留時間 2000ms (2秒)
 
         // --- 全頁面煙火動畫函式 (功能不變) ---
         function createFireworks() {
@@ -286,7 +291,7 @@
             }, 2000); 
         }
 
-        // --- 遊戲核心邏輯 (部分省略) ---
+        // --- 遊戲核心邏輯 ---
         function preloadAllImages() { /* ... 不變 ... */ }
         function updateScore(points) { /* ... 不變 ... */ }
 
@@ -325,7 +330,7 @@
             let options = new Set();
             options.add(correctAnswer); 
             
-            const totalOptions = 4; // 總選項數量為 4
+            const totalOptions = 4; // 核心：總選項數量為 4
 
             while (options.size < totalOptions) {
                 let randomOption = Math.floor(Math.random() * 10) + 1; 
@@ -357,7 +362,7 @@
                 fireworksSound.play().catch(e => console.error("Audio play failed:", e));
             }
             
-            // 1. 隱藏選項區，讓正確答案獨自放大
+            // 1. 隱藏選項區
             optionsArea.classList.add('fade-out');
 
             // 2. 答案圖片出現在中央並開始脈衝
@@ -365,17 +370,17 @@
             answerImg.style.opacity = 1;
             answerImg.classList.add('pulse-animation');
             
-            // 啟動全頁面煙火特效
+            // 啟動全頁面煙火特效 (會持續 2秒)
             createFireworks();
         
-            // 3. 清理與下一題 (ANIMATION_DURATION)
+            // 3. 清理與下一題 (ANIMATION_TOTAL_DURATION = 2000ms)
             setTimeout(() => {
                 answerImg.classList.remove('pulse-animation');
                 generateQuestion();
                 document.querySelectorAll('.option-button').forEach(btn => {
                     btn.style.pointerEvents = 'auto';
                 });
-            }, ANIMATION_DURATION); 
+            }, ANIMATION_TOTAL_DURATION); // 核心：等待 2 秒後再出下一題
         }
 
         function checkAnswer(selectedAnswer, button) {
@@ -407,13 +412,6 @@
 
         // 頁面載入時
         document.addEventListener('DOMContentLoaded', () => {
-            // 確保 answerImg 元素在 DOM 中
-            const existingAnswerImg = document.getElementById('answerImg');
-            if (!existingAnswerImg) {
-                // 如果您在 HTML 中沒有保留 answerImg，這裡需要確保它被初始化
-                // 由於 HTML 已經修正，這裡不用再重複創建
-            }
-
             preloadAllImages();
             updateScore(0);
             generateQuestion();
