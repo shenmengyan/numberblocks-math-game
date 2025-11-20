@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Numberblocks 千荷的數學派對</title>
+    <title>Numberblocks 數學派對</title>
     <style>
         /* 基礎設定 */
         body {
@@ -51,7 +51,6 @@
             color: #e91e63;
             font-size: 24px;
         }
-        /* ================= */
 
         /* 遊戲主容器 */
         .game-container {
@@ -64,6 +63,8 @@
             max-width: 500px;
             border: 6px solid #fff;
             margin-top: 10px;
+            position: relative; 
+            z-index: 2; /* 確保在煙火之上 */
         }
 
         /* 題目區域 */
@@ -128,7 +129,7 @@
             justify-content: center;
             padding: 5px;
             box-shadow: 0 4px #f9a825;
-            -webkit-tap-highlight-color: transparent; /* 移除點擊藍框 */
+            -webkit-tap-highlight-color: transparent; 
         }
 
         .option-btn img {
@@ -175,7 +176,7 @@
 
         /* 特效層 */
         #effects-container {
-            position: absolute;
+            position: fixed; /* 改為 fixed 確保覆蓋全螢幕 */
             width: 100%;
             height: 100%;
             top: 0;
@@ -196,7 +197,6 @@
             to { transform: translateY(110vh) rotate(720deg); }
         }
 
-        /* 彈出動畫 */
         @keyframes pop {
             0% { transform: scale(0.5); opacity: 0; }
             80% { transform: scale(1.1); }
@@ -247,12 +247,15 @@
 
     <script>
         // ==========================================
-        // 音效設定 (使用 Google 的免費音效連結)
+        // 音效設定 
         // ==========================================
-        const correctSound = new Audio("https://actions.google.com/sounds/v1/cartoon/magic_wand_1.ogg");
+        // 正確答案：讀取您上傳的 fireworks.mp3
+        const correctSound = new Audio("fireworks.mp3");
+        
+        // 錯誤答案：維持原本的卡通音效
         const wrongSound = new Audio("https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg");
         
-        // 預先載入音效，避免第一次點擊沒聲音
+        // 預先載入音效
         correctSound.load();
         wrongSound.load();
         // ==========================================
@@ -261,15 +264,11 @@
         let score = 0;
         const positivePhrases = ["好棒喔！", "答對了！", "太厲害了！", "做得好！", "Bingo!"];
 
-        // 產生圖片 HTML (現在 0 也會嘗試讀取圖片)
+        // 圖片處理：先嘗試 .png，失敗則嘗試 .PNG，再失敗則顯示純數字
         function getImgTag(num, isSmall = false) {
-            // 設定 CSS class
             let className = isSmall ? '' : 'nb-character pop-in';
             let style = isSmall ? 'style="height:65px;max-width:65px;object-fit:contain;margin-bottom:5px;"' : '';
             
-            // 不管是不是 0，都先嘗試讀取 .png
-            // 如果失敗 (onerror)，嘗試 .PNG
-            // 如果還是失敗，則隱藏圖片並顯示文字數字
             return `<img src="${num}.png" class="${className}" ${style} alt="${num}" 
                     onerror="this.onerror=null; this.src='${num}.PNG'; this.nextElementSibling ? this.nextElementSibling.style.display='block' : null; if(this.src.includes('PNG')) { this.onerror = function(){ this.style.display='none'; if(this.parentElement) this.parentElement.innerText='${num}'; } }">`;
         }
@@ -295,7 +294,7 @@
                 document.getElementById('op-symbol').innerText = '-';
             }
 
-            // 更新題目區
+            // 更新題目
             document.getElementById('img-left').innerHTML = getImgTag(num1);
             document.getElementById('num-left').innerText = num1;
             
@@ -323,8 +322,8 @@
                 let btn = document.createElement('button');
                 btn.className = 'option-btn';
                 
-                // 按鈕內部：圖片 + 數字
-                let imgHtml = getImgTag(num, true); // true 代表這是小圖標
+                // 按鈕內部
+                let imgHtml = getImgTag(num, true);
                 
                 btn.innerHTML = `${imgHtml}<span>${num}</span>`;
                 btn.onclick = () => checkAnswer(num, btn);
@@ -338,15 +337,16 @@
             
             if (selected === currentAnswer) {
                 // === 答對 ===
-                // 1. 更新分數
                 score++;
                 scoreSpan.innerText = score;
 
-                // 2. 播放音效
-                correctSound.currentTime = 0; // 重置音效時間，確保連點可以播放
-                correctSound.play().catch(e => console.log("Audio play blocked:", e));
+                // 播放煙火音效
+                correctSound.currentTime = 0; 
+                // 加上 console.log 來檢查是否有執行播放
+                console.log("Playing correct sound...");
+                correctSound.play().catch(e => console.error("無法播放聲音:", e));
 
-                // 3. 顯示訊息與動畫
+                // 顯示文字與特效
                 let phrase = positivePhrases[Math.floor(Math.random() * positivePhrases.length)];
                 msgDiv.innerText = `${phrase}`;
                 msgDiv.style.color = "#4CAF50";
@@ -357,31 +357,29 @@
                 
                 createConfetti();
                 
-                // 4. 延遲後換下一題
-                setTimeout(newQuestion, 2000); 
+                setTimeout(newQuestion, 2500); // 稍微延長一點時間讓煙火飛
             } else {
                 // === 答錯 ===
-                // 1. 播放音效
                 wrongSound.currentTime = 0;
-                wrongSound.play().catch(e => console.log("Audio play blocked:", e));
+                wrongSound.play().catch(e => console.error("無法播放聲音:", e));
 
-                // 2. 顯示訊息與樣式
                 msgDiv.innerText = "再試試看？";
                 msgDiv.style.color = "#ff7043";
                 btnElement.style.opacity = "0.6";
                 btnElement.style.backgroundColor = "#eee";
-                btnElement.disabled = true; // 禁用錯誤按鈕
+                btnElement.disabled = true;
             }
         }
 
         function createConfetti() {
-            const emojis = ['⭐', '🎈', '✨', '🎉', '100', '🍬'];
+            const emojis = ['⭐', '🎈', '✨', '🎉', '100', '🎆'];
             const container = document.getElementById('effects-container');
-            for (let i = 0; i < 25; i++) {
+            for (let i = 0; i < 30; i++) {
                 const el = document.createElement('div');
                 el.innerText = emojis[Math.floor(Math.random() * emojis.length)];
                 el.className = 'confetti';
                 el.style.left = Math.random() * 100 + 'vw';
+                // 讓煙火掉落時間不一
                 el.style.animationDuration = (Math.random() * 2 + 1.5) + 's';
                 container.appendChild(el);
             }
