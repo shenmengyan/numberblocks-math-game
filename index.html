@@ -19,13 +19,13 @@
             min-height: 100vh;
             margin: 0;
             overflow: hidden;
-            touch-action: manipulation; /* 防止雙擊放大 */
+            touch-action: manipulation;
         }
 
         h1 {
             color: #01579b;
             margin: 10px 0;
-            font-size: 24px;
+            font-size: 26px;
             text-shadow: 2px 2px white;
         }
 
@@ -47,29 +47,28 @@
             align-items: center;
             justify-content: center;
             gap: 5px;
-            margin: 10px 0;
-            min-height: 140px;
+            margin: 15px 0;
+            min-height: 130px;
         }
 
         .symbol {
             font-size: 40px;
             font-weight: 900;
             color: #555;
-            margin: 0 5px;
+            margin: 0 2px;
         }
 
-        /* 圖片樣式 */
+        /* 圖片顯示樣式 */
         .nb-character {
-            height: 100px; /* 手機版稍微縮小 */
+            height: 100px;
             width: auto;
             max-width: 80px;
             object-fit: contain;
             filter: drop-shadow(3px 3px 3px rgba(0,0,0,0.2));
         }
 
-        /* 數字標籤 */
         .number-label {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
             margin-top: 5px;
             color: #333;
@@ -79,23 +78,23 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 90px;
+            width: 85px;
         }
 
-        /* === 選項按鈕區域 (修改版) === */
+        /* 選項按鈕區域 */
         .options-area {
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: 12px;
             margin-top: 20px;
         }
 
         .option-btn {
-            background-color: #fff; /* 改為白色底比較凸顯圖片 */
-            border: 4px solid #fbc02d; /* 黃色框 */
+            background-color: #fff;
+            border: 4px solid #fbc02d;
             border-radius: 20px;
             width: 90px;
-            height: 110px; /* 加高以容納圖片 */
+            height: 120px; /* 高度足夠放圖片和數字 */
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
@@ -111,13 +110,13 @@
             width: auto;
             max-width: 70px;
             object-fit: contain;
+            margin-bottom: 5px;
         }
 
         .option-btn span {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: bold;
             color: #333;
-            margin-top: 5px;
         }
 
         .option-btn:active {
@@ -125,7 +124,7 @@
             box-shadow: 0 1px #f9a825;
         }
 
-        /* 0 的框框 */
+        /* 0 的空框框 */
         .empty-box {
             width: 60px;
             height: 60px;
@@ -142,13 +141,13 @@
         /* 回饋訊息 */
         .feedback {
             height: 30px;
-            font-size: 20px;
+            font-size: 22px;
             font-weight: bold;
             color: #4CAF50;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
-        /* 動畫與特效 */
+        /* 動畫特效 */
         @keyframes pop {
             0% { transform: scale(0.5); opacity: 0; }
             80% { transform: scale(1.1); }
@@ -170,7 +169,7 @@
     <div class="game-container">
         <div class="feedback" id="message">選一個答案吧！</div>
 
-        <!-- 題目顯示區 -->
+        <!-- 題目區 -->
         <div class="problem-area">
             <div class="character-wrapper">
                 <div id="img-left"></div>
@@ -196,9 +195,9 @@
 
     <script>
         // ==========================================
-        // 圖片路徑設定 (指向 images 資料夾)
+        // 圖片設定：直接讀取當前資料夾的圖片
         // ==========================================
-        const imagePath = "images/"; 
+        const imagePath = ""; // 空字串代表 "同一層資料夾"
         const imageExtension = ".png"; 
         
         function getImagePath(num) {
@@ -209,13 +208,12 @@
         const positivePhrases = ["好棒喔！", "答對了！", "太厲害了！", "做得好！", "Bingo!"];
 
         // 產生圖片 HTML
-        function getCharacterHtml(num, isSmall = false) {
+        function getCharacterHtml(num) {
             if (num === 0) {
                 return `<div class="empty-box pop-in">0</div>`;
             } else {
-                // 這裡使用 onerror，如果找不到圖片，就顯示數字
-                let sizeClass = isSmall ? 'style="height:60px;"' : '';
-                return `<img src="${getImagePath(num)}" class="nb-character pop-in" ${sizeClass} alt="${num}" onerror="this.style.display='none';this.parentElement.innerText='${num}'">`;
+                // onerror 用於處理圖片讀取失敗時（例如還沒放圖片），自動顯示文字數字
+                return `<img src="${getImagePath(num)}" class="nb-character pop-in" alt="${num}" onerror="this.style.display='none';this.parentElement.innerText='${num}'">`;
             }
         }
 
@@ -228,12 +226,14 @@
             let num1, num2;
 
             if (isAddition) {
+                // 加法
                 num1 = Math.floor(Math.random() * 6); // 0-5
                 num2 = Math.floor(Math.random() * (11 - num1)); 
                 if (num1 === 0 && num2 === 0) num2 = 1; 
                 currentAnswer = num1 + num2;
                 document.getElementById('op-symbol').innerText = '+';
             } else {
+                // 減法
                 num1 = Math.floor(Math.random() * 10) + 1; // 1-10
                 num2 = Math.floor(Math.random() * (num1 + 1)); 
                 currentAnswer = num1 - num2;
@@ -249,7 +249,7 @@
             generateOptions(currentAnswer);
         }
 
-        // 產生選項 (現在選項也有圖片了)
+        // 產生選項按鈕（包含圖片和數字）
         function generateOptions(correct) {
             let container = document.getElementById('options-container');
             container.innerHTML = '';
@@ -268,11 +268,15 @@
                 let btn = document.createElement('button');
                 btn.className = 'option-btn';
                 
-                // 按鈕內部：上面是圖片，下面是數字
-                let imgHtml = num === 0 ? '<div class="empty-box" style="width:40px;height:40px;font-size:20px">0</div>' : `<img src="${getImagePath(num)}" alt="${num}" onerror="this.style.display='none'">`;
+                // 按鈕內容：上圖下字
+                let imgHtml;
+                if (num === 0) {
+                     imgHtml = '<div class="empty-box" style="width:50px;height:50px;font-size:20px;margin-bottom:5px;">0</div>';
+                } else {
+                     imgHtml = `<img src="${getImagePath(num)}" alt="${num}" onerror="this.style.display='none'">`;
+                }
                 
                 btn.innerHTML = `${imgHtml}<span>${num}</span>`;
-                
                 btn.onclick = () => checkAnswer(num, btn);
                 container.appendChild(btn);
             });
@@ -314,7 +318,7 @@
             }
         }
 
-        // 啟動遊戲
+        // 啟動
         newQuestion();
 
     </script>
