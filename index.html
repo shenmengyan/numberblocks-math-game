@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Numberblocks Math Fun! (Final Horizontal Options)</title>
+    <title>Numberblocks Math Fun! (Final UX Standard)</title>
     <style>
-        /* 基礎樣式和響應式排版 */
+        /* 基礎樣式和全局設置 */
         body {
             font-family: 'Arial', sans-serif;
             display: flex;
@@ -36,7 +36,7 @@
             100% { transform: translateX(105vw); }
         }
 
-        /* 遊戲主容器 - 佔據約 80% 的視窗空間 */
+        /* 遊戲主容器 - 使用 FLEX 佈局實現分數推到底部 */
         .game-container {
             background-color: rgba(255, 255, 255, 0.9);
             border-radius: 30px; 
@@ -53,23 +53,27 @@
             z-index: 10;
         }
 
+        /* 自適應字體 (clamp) */
         .title {
-            font-size: 6vmin;
+            /* 標題：24px - 32px */
+            font-size: clamp(24px, 6vmin, 32px);
             color: #FF5733;
             text-shadow: 2px 2px 3px rgba(0,0,0,0.2);
             font-weight: bold;
         }
         
-        /* 計分板樣式 */
+        /* 計分板樣式 - 移到底部 */
         #scoreDisplay {
-            font-size: 4vmin;
+            /* 分數：20px - 24px */
+            font-size: clamp(20px, 4vmin, 24px);
             font-weight: bold;
             color: #007BFF;
+            margin-top: auto; /* 核心：將分數推到底部 */
             margin-bottom: 2vmin;
             text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
         }
 
-        /* 題目區 - 核心調整：圖片尺寸優化 */
+        /* 題目區 - 圖片尺寸優化 */
         .question-area {
             display: flex;
             justify-content: center;
@@ -80,7 +84,6 @@
         }
 
         .question-area img {
-            /* 修正：圖片尺寸調整為 30vmin */
             height: 30vmin; 
             object-fit: contain;
             transition: transform 0.3s ease-out, opacity 0.5s;
@@ -103,8 +106,10 @@
              animation: breathing 3s infinite ease-in-out; 
         }
 
+        /* 運算符號和問號字體 */
         .question-area .operator, .question-area .equals {
-            font-size: 10vmin;
+            /* 題目：28px - 36px */
+            font-size: clamp(28px, 10vmin, 36px);
             font-weight: bold;
             color: #333;
         }
@@ -116,32 +121,36 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 10vmin;
+            font-size: clamp(28px, 10vmin, 36px);
             color: #666;
             font-weight: bold;
             background-color: #f0f0f0;
             transition: background-color 0.3s;
         }
         
-        /* 選項區 - 核心修改：橫排三列 (GRID) */
+        /* 選項區 - 手機模式：橫排三列 (GRID) */
         .options-area {
-            /* 恢復 GRID 佈局 */
             display: grid; 
             grid-template-columns: repeat(3, 1fr);
             gap: 3vmin; 
             margin-top: 2vmin;
-            /* 移除 flex-grow */
-            flex-grow: 0; 
             justify-content: center;
         }
 
         .option-button {
+            /* UX 核心規範：按鈕最小尺寸 >= 96px */
+            min-width: 96px;
+            min-height: 96px; 
+            
+            /* 可點擊範圍外擴到 128px：透過邊距和 padding 實現 */
+            padding: 4vmin; 
+            margin: 4px; /* 增加按鈕之間的實際間隔 */
+            
             border: 4px solid #FFC300; 
             border-radius: 20px; 
-            padding: 2vmin;
             cursor: pointer;
             position: relative;
-            /* 修正：選項按鈕高度恢復到適應橫排的高度 */
+            /* 高度：確保圖片能容納 */
             height: 25vmin; 
             display: flex;
             justify-content: center;
@@ -181,6 +190,27 @@
         .wrong-indicator { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4em; color: #F44336; font-weight: bold; z-index: 10; animation: popIn 0.3s ease-out forwards; }
         @keyframes popIn { from { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
 
+        /* --- 平板優化 (Media Query)：大於等於 1024px 切換 --- */
+        @media (min-width: 1024px) {
+            .game-container {
+                max-width: 900px; /* 平板最大寬度 */
+                min-height: 80vh;
+                gap: 5vmin;
+            }
+            .question-area {
+                /* 平板：算式左右加大留白 */
+                padding: 0 50px; 
+            }
+            .options-area {
+                /* 平板：答案改四欄 */
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .option-button {
+                /* 平板：按鈕可以稍微降低高度，保持視覺比例 */
+                height: 20vmin; 
+            }
+        }
+        
         /* 圖片預載入 */
         #preload-images { display: none; }
 
@@ -198,8 +228,6 @@
     <div class="game-container">
         <div class="title">NUMBERBLOCKS MATH FUN!</div>
         
-        <div id="scoreDisplay">分數: 0</div> 
-
         <div class="question-area" id="questionArea">
             <img id="num1Img" src="" alt="Numberblock 1">
             <span class="operator" id="operator">+</span>
@@ -210,6 +238,8 @@
 
         <div class="options-area" id="optionsArea">
         </div>
+        
+        <div id="scoreDisplay">分數: 0</div> 
     </div>
 
     <div id="preload-images"></div>
@@ -247,7 +277,7 @@
         let opValue = '';
         let score = 0;
 
-        // --- 全頁面煙火動畫函式 (功能不變) ---
+        // --- 全頁面煙火動畫函式 ---
         function createFireworks() {
             const colors = ['#FFC300', '#FF5733', '#C70039', '#900C3F', '#581845', '#00BFFF', '#32CD32', '#FF69B4'];
             const numBursts = 5; 
