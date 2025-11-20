@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Numberblocks Math Fun! (Final 2x2 Layout)</title>
+    <title>Numberblocks Math Fun! (Final Build)</title>
     <style>
         /* 基礎樣式和響應式排版 */
         body {
@@ -36,7 +36,7 @@
             100% { transform: translateX(105vw); }
         }
 
-        /* 遊戲主容器 - 佔據約 80% 的視窗空間 */
+        /* 遊戲主容器 */
         .game-container {
             background-color: rgba(255, 255, 255, 0.9);
             border-radius: 30px; 
@@ -60,24 +60,25 @@
             font-weight: bold;
         }
         
-        /* 計分板樣式 - 位於底部 */
+        /* 核心調整 1: 分數板移動到標題下方 */
         #scoreDisplay {
             font-size: clamp(20px, 4vmin, 24px);
             font-weight: bold;
             color: #007BFF;
-            margin-top: auto; 
-            margin-bottom: 5vmin; 
+            margin-top: 1vmin; /* 標題下方微間距 */
+            margin-bottom: 5vmin; /* 與算式區的間距 */
             text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+            /* 移除舊的 `margin-top: auto;` 樣式 */
         }
 
-        /* 題目區 */
+        /* 題目區 (算式部分放大 20%) */
         .question-area {
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 4vmin; 
             margin-bottom: 4vmin;
-            min-height: 30vmin; 
+            min-height: 42vmin; 
             position: relative;
         }
         .question-area .equals, .question-area .placeholder {
@@ -85,7 +86,8 @@
         }
 
         .question-area img {
-            height: 35vmin; /* 算式圖片大小 */
+            /* 圖片尺寸放大 20% (42vmin) */
+            height: 42vmin; 
             object-fit: contain;
             transition: transform 0.3s ease-out, opacity 0.5s;
             animation: none !important; 
@@ -107,14 +109,15 @@
         }
 
         .question-area .operator {
-            font-size: clamp(28px, 10vmin, 36px);
+            /* 運算符號等比例放大 */
+            font-size: 14.4vmin;
             font-weight: bold;
             color: #333;
         }
 
-        /* --- 動畫舞台：答案圖片在此放大脈衝 --- */
+        /* --- 動畫舞台：答案圖片脈衝區 --- */
         #animationStage {
-            min-height: 35vmin; 
+            min-height: 42vmin; 
             display: flex;
             justify-content: center;
             align-items: center;
@@ -123,7 +126,7 @@
             margin-bottom: 5vmin;
         }
         #answerImg {
-            height: 35vmin;
+            height: 42vmin; 
             object-fit: contain;
             transition: opacity 0.3s;
             opacity: 0;
@@ -136,20 +139,18 @@
             70% { transform: scale(0.95); opacity: 1; } 
             100% { transform: scale(1); opacity: 1; } 
         }
-        /* 脈衝動畫將在 JS 中動態應用 */
         .pulse-animation {
-            /* 執行 2 次脈衝, 總時長 1.6秒 */
-            animation: pulseSuccess 0.8s ease-out 0s 2; 
+            /* 執行 3 次脈衝, 總時長 2.4秒，讓 3秒停留時間更飽滿 */
+            animation: pulseSuccess 0.8s ease-out 0s 3; 
         }
 
 
-        /* 選項區 - 核心修改：2x2 橫排兩欄 (GRID) */
+        /* 選項區 - 2x2 橫排兩欄 (GRID) */
         .options-area {
             display: grid; 
             grid-template-columns: repeat(2, 1fr); /* 核心：2x2 佈局 */
             gap: 3vmin; 
             margin-top: 2vmin;
-            /* 確保選項區佔用剩餘空間，推動分數區 */
             flex-grow: 1; 
             justify-content: center;
         }
@@ -160,7 +161,6 @@
         }
 
         .option-button {
-            /* UX 規範：最小 96px */
             min-width: 96px;
             min-height: 96px; 
             padding: 1vmin;
@@ -169,11 +169,11 @@
             border-radius: 20px; 
             cursor: pointer;
             position: relative;
-            height: 35vmin; /* 配合 2x2 佈局，高度較高 */
+            height: 35vmin; 
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: all 0.2s, opacity 0.2s; /* 確保能快速消失 */
+            transition: all 0.2s, opacity 0.2s;
         }
         .option-button:hover {
             transform: translateY(-2px);
@@ -190,16 +190,16 @@
             pointer-events: none; 
         }
 
-        /* 其它動畫保持不變 */
+        /* 其它動畫樣式保持不變 */
         @keyframes jumpAndMerge { 0% { transform: translateY(0); opacity: 1; } 50% { transform: translateY(-30px); opacity: 1; } 100% { transform: translateY(0); opacity: 0; } }
-        @keyframes flyOut { 0% { transform: translateX(0) scale(1); opacity: 1; } 100% { transform: translate(50px, -50px) scale(0.5); opacity: 0; } }
-        @keyframes flashSuccess { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .fireworks-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 20; pointer-events: none; overflow: hidden; }
         @keyframes firework { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(var(--x), var(--y)) scale(0) rotate(360deg); opacity: 0; } }
         .firework { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: var(--color); box-shadow: 0 0 8px var(--color); animation: firework 2s ease-out forwards; }
         .wrong-indicator { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4em; color: #F44336; font-weight: bold; z-index: 10; animation: popIn 0.3s ease-out forwards; }
         @keyframes popIn { from { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
         @media (min-width: 1024px) { 
+            .game-container { max-width: 900px; min-height: 80vh; gap: 5vmin; }
+            .question-area { padding: 0 50px; }
             .options-area { grid-template-columns: repeat(4, 1fr); }
             .option-button { height: 20vmin; }
         }
@@ -219,6 +219,8 @@
     <div class="game-container">
         <div class="title">NUMBERBLOCKS MATH FUN!</div>
         
+        <div id="scoreDisplay">分數: 0</div> 
+
         <div class="question-area" id="questionArea">
             <img id="num1Img" src="" alt="Numberblock 1">
             <span class="operator" id="operator">-"></span>
@@ -232,12 +234,11 @@
         <div class="options-area" id="optionsArea">
         </div>
         
-        <div id="scoreDisplay">分數: 0</div> 
     </div>
 
     <div id="preload-images"></div>
 
-    <audio id="fireworksSound" src="fireworks.mp3" preload="auto"></audio>
+    <audio id="fireworksSound" src="fireworks.mp3" preload="auto"></audio> 
 
     <script>
         // *** 圖片連結：使用本地檔案路徑 ***
@@ -257,9 +258,9 @@
         const answerImg = document.getElementById('answerImg'); 
         
         let correctAnswer = 0;
-        let opValue = '';
         let score = 0;
-        const ANIMATION_TOTAL_DURATION = 2000; // 核心：總停留時間 2000ms (2秒)
+        // 核心調整 2: 總停留時間為 3000ms (3秒)
+        const ANIMATION_TOTAL_DURATION = 3000; 
 
         // --- 全頁面煙火動畫函式 (功能不變) ---
         function createFireworks() {
@@ -292,12 +293,14 @@
         }
 
         // --- 遊戲核心邏輯 ---
-        function preloadAllImages() { /* ... 不變 ... */ }
-        function updateScore(points) { /* ... 不變 ... */ }
+        function updateScore(points) {
+            score += points;
+            scoreDisplay.textContent = `分數: ${score}`;
+        }
 
         function generateQuestion() {
-            answerImg.style.opacity = 0; // 隱藏答案圖片
-            optionsArea.classList.remove('fade-out'); // 確保選項區可見
+            answerImg.style.opacity = 0; 
+            optionsArea.classList.remove('fade-out'); 
             
             let num1, num2, op;
             op = Math.random() < 0.5 ? '+' : '-';
@@ -312,25 +315,25 @@
                 correctAnswer = num1 - num2;
             }
             
-            opValue = op;
             num1Img.src = numberblockImages[num1];
             num2Img.src = numberblockImages[num2];
             operatorSpan.textContent = op;
 
+            // 重啟呼吸動畫
             num1Img.style.animation = 'breathing 3s infinite ease-in-out';
             num2Img.style.animation = 'breathing 3s infinite ease-in-out';
             
             generateOptions(correctAnswer);
         }
 
-        // 核心邏輯修改：生成 4 個選項
+        // 生成 4 個選項 (2x2 佈局)
         function generateOptions(correctAnswer) {
             optionsArea.innerHTML = '';
             
             let options = new Set();
             options.add(correctAnswer); 
             
-            const totalOptions = 4; // 核心：總選項數量為 4
+            const totalOptions = 4; 
 
             while (options.size < totalOptions) {
                 let randomOption = Math.floor(Math.random() * 10) + 1; 
@@ -354,7 +357,7 @@
         }
 
 
-        // --- 核心：答案脈衝閃爍邏輯 ---
+        // --- 核心：答案脈衝閃爍邏輯 (3秒停留) ---
         function playSuccessAnimation() {
             // 播放音效
             if (fireworksSound) {
@@ -370,23 +373,25 @@
             answerImg.style.opacity = 1;
             answerImg.classList.add('pulse-animation');
             
-            // 啟動全頁面煙火特效 (會持續 2秒)
+            // 啟動全頁面煙火特效
             createFireworks();
         
-            // 3. 清理與下一題 (ANIMATION_TOTAL_DURATION = 2000ms)
+            // 3. 清理與下一題 (等待 3 秒)
             setTimeout(() => {
                 answerImg.classList.remove('pulse-animation');
                 generateQuestion();
                 document.querySelectorAll('.option-button').forEach(btn => {
                     btn.style.pointerEvents = 'auto';
                 });
-            }, ANIMATION_TOTAL_DURATION); // 核心：等待 2 秒後再出下一題
+            }, ANIMATION_TOTAL_DURATION); // 核心：等待 3 秒後再出下一題
         }
 
         function checkAnswer(selectedAnswer, button) {
+            // 避免重複點擊
             document.querySelectorAll('.option-button').forEach(btn => {
                 btn.style.pointerEvents = 'none';
             });
+            // 清理錯誤標記
             document.querySelectorAll('.option-button').forEach(btn => {
                 btn.classList.remove('wrong');
                 const wrongIndicator = btn.querySelector('.wrong-indicator');
@@ -395,7 +400,7 @@
 
             if (selectedAnswer === correctAnswer) {
                 button.classList.add('correct');
-                updateScore(1);
+                updateScore(1); // 答對加一分
                 playSuccessAnimation();
             } else {
                 button.classList.add('wrong');
@@ -404,12 +409,23 @@
                 wrongIndicator.textContent = '❌';
                 button.appendChild(wrongIndicator);
                 
+                // 答錯後允許重新點擊
                 document.querySelectorAll('.option-button').forEach(btn => {
                     btn.style.pointerEvents = 'auto';
                 });
             }
         }
 
+        function preloadAllImages() {
+            const preloadDiv = document.getElementById('preload-images');
+            for (const num in numberblockImages) {
+                const img = new Image();
+                // 這裡應該根據您實際的圖片路徑來調整
+                img.src = numberblockImages[num];
+                preloadDiv.appendChild(img);
+            }
+        }
+        
         // 頁面載入時
         document.addEventListener('DOMContentLoaded', () => {
             preloadAllImages();
