@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Numberblocks Math Fun! (Final 2x2 Layout)</title>
+    <title>Numberblocks Math Fun! (Final Build)</title>
     <style>
         /* 基礎樣式和響應式排版 */
         body {
@@ -32,7 +32,8 @@
             max-height: 95vh;
             display: flex;
             flex-direction: column;
-            gap: 2vmin;
+            /* 修正：縮小區塊間的間距，讓整體更緊湊 */
+            gap: 1vmin; 
             position: relative;
             z-index: 10;
         }
@@ -60,7 +61,8 @@
             justify-content: center;
             align-items: center;
             gap: 2vmin; 
-            margin-bottom: 0;
+            /* 核心修正：移除底部邊距 */
+            margin-bottom: 0; 
             min-height: 42vmin; 
             position: relative;
         }
@@ -96,7 +98,7 @@
             color: #333;
         }
 
-        /* --- 動畫舞台：答案圖片脈衝區 --- */
+        /* --- 動畫舞台 (答案圖片脈衝區) --- */
         #animationStage {
             min-height: 42vmin; 
             display: flex;
@@ -104,21 +106,20 @@
             align-items: center;
             position: relative;
             z-index: 15;
+            /* 核心修正：移除所有垂直方向的間距 */
             margin-bottom: 0;
             margin-top: 0;
-            padding-bottom: 2vmin; 
+            padding-top: 0;
+            padding-bottom: 0; 
         }
-        
-        /* 答案等號樣式 (新增) */
         #answerEquals {
-            font-size: 14.4vmin; /* 與算式運算符號大小一致 */
+            font-size: 14.4vmin; 
             font-weight: bold;
             color: #333;
-            margin-right: 2vmin; /* 確保與圖片有間距 */
+            margin-right: 2vmin; 
             opacity: 0;
             transition: opacity 0.3s;
         }
-
         #answerImg {
             height: 42vmin; 
             object-fit: contain;
@@ -143,6 +144,7 @@
             display: grid; 
             grid-template-columns: repeat(2, 1fr); 
             gap: 2vmin; 
+            /* 核心修正：移除頂部間距，緊貼上方區塊 */
             margin-top: 0; 
             flex-grow: 1; 
             justify-content: center;
@@ -204,11 +206,6 @@
 </head>
 <body>
     
-    <div class="cloud"></div>
-    <div class="cloud"></div>
-    <div class="cloud"></div>
-    <div class="cloud"></div>
-
     <div id="fireworksContainer" class="fireworks-container"></div>
 
     <div class="game-container">
@@ -252,14 +249,14 @@
         const scoreDisplay = document.getElementById('scoreDisplay');
         const fireworksContainer = document.getElementById('fireworksContainer');
         const answerImg = document.getElementById('answerImg'); 
-        const answerEquals = document.getElementById('answerEquals'); // 新增：等號元素
+        const answerEquals = document.getElementById('answerEquals'); 
         
         let correctAnswer = 0;
         let opValue = '';
         let score = 0;
         const ANIMATION_TOTAL_DURATION = 3000; // 核心：總停留時間 3000ms (3秒)
 
-        // --- 全頁面煙火動畫函式 (功能不變) ---
+        // --- 全頁面煙火動畫函式 ---
         function createFireworks() {
             const colors = ['#FFC300', '#FF5733', '#C70039', '#900C3F', '#581845', '#00BFFF', '#32CD32', '#FF69B4'];
             const numBursts = 5; 
@@ -296,10 +293,9 @@
         }
 
         function generateQuestion() {
-            // 重置答案區狀態
             answerImg.style.opacity = 0; 
-            answerEquals.style.opacity = 0; // 隱藏等號
-            answerImg.classList.remove('pulse-animation'); // 移除動畫類
+            answerEquals.style.opacity = 0; 
+            answerImg.classList.remove('pulse-animation'); 
             optionsArea.classList.remove('fade-out'); 
             
             let num1, num2, op;
@@ -368,7 +364,7 @@
             // 1. 隱藏選項區
             optionsArea.classList.add('fade-out');
 
-            // 2. 答案圖片和等號出現在中央並開始脈衝
+            // 2. 答案圖片出現在中央並開始脈衝
             answerImg.src = numberblockImages[correctAnswer];
             answerImg.style.opacity = 1;
             answerEquals.style.opacity = 1; // 顯示等號
