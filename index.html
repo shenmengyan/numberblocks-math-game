@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Numberblocks 數學派對</title>
+    <title>千荷’s Math Party</title>
     <style>
         /* 基礎設定 */
         body {
@@ -24,10 +24,22 @@
 
         h1 {
             color: #01579b;
-            margin: 5px 0;
+            margin: 5px 0 0 0; /* 修改下方邊距，讓副標題靠近一點 */
             font-size: 24px;
             text-shadow: 2px 2px white;
         }
+
+        /* === 新增：副標題樣式 === */
+        .subtitle {
+            color: #e91e63; /* 亮眼的粉紅色 */
+            font-size: 20px;
+            margin-top: 2px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            text-shadow: 1px 1px white;
+            letter-spacing: 1px;
+        }
+        /* ====================== */
 
         /* === 計分板樣式 === */
         .scoreboard {
@@ -62,7 +74,7 @@
             width: 90%;
             max-width: 500px;
             border: 6px solid #fff;
-            margin-top: 10px;
+            margin-top: 5px;
             position: relative; 
             z-index: 2;
         }
@@ -129,7 +141,7 @@
             justify-content: center;
             padding: 5px;
             box-shadow: 0 4px #f9a825;
-            position: relative; /* 為了讓紅叉叉定位 */
+            position: relative; 
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -152,27 +164,26 @@
             box-shadow: 0 1px #f9a825;
         }
 
-        /* === 新增：錯誤答案的紅叉叉樣式 === */
+        /* 錯誤答案的紅叉叉樣式 */
         .option-btn.wrong {
-            background-color: #ffebee; /* 變成淺紅色背景 */
+            background-color: #ffebee;
             border-color: #ef9a9a;
             box-shadow: none;
             transform: translateY(2px);
         }
 
-        /* 利用 CSS 偽元素畫出紅叉叉 */
         .option-btn.wrong::after {
-            content: "✖";  /* 特殊符號 X */
+            content: "✖";
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             font-size: 80px;
-            color: rgba(255, 0, 0, 0.8); /* 紅色，稍微透明 */
+            color: rgba(255, 0, 0, 0.8);
             font-weight: bold;
-            text-shadow: 2px 2px 0px white; /* 白邊讓叉叉更明顯 */
-            pointer-events: none; /* 讓點擊穿透 */
-            animation: shake 0.3s; /* 微微震動 */
+            text-shadow: 2px 2px 0px white;
+            pointer-events: none;
+            animation: shake 0.3s;
         }
 
         @keyframes shake {
@@ -181,9 +192,8 @@
             50% { transform: translate(-45%, -50%) rotate(5deg); }
             100% { transform: translate(-50%, -50%) rotate(0deg); }
         }
-        /* ================================= */
 
-        /* 0 圖片讀取失敗時的備用框 */
+        /* 備用框 */
         .empty-box {
             width: 60px;
             height: 60px;
@@ -250,6 +260,8 @@
     <div id="effects-container"></div>
 
     <h1>Numberblocks 數學派對</h1>
+    <!-- 新增的副標題 -->
+    <div class="subtitle">千荷’s Math Party</div>
     
     <div class="game-container">
         <div class="feedback" id="message">選一個答案吧！</div>
@@ -381,9 +393,9 @@
                 wrongSound.currentTime = 0;
                 wrongSound.play().catch(e => console.error("錯誤音效失敗:", e));
 
-                // 新增：加上 'wrong' class，CSS 會自動畫出紅叉叉
+                // 錯誤時顯示紅叉叉並鎖定按鈕
                 btnElement.classList.add('wrong');
-                btnElement.disabled = true; // 禁用該按鈕
+                btnElement.disabled = true; 
 
                 msgDiv.innerText = "再試試看？";
                 msgDiv.style.color = "#ff7043";
