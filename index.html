@@ -45,8 +45,7 @@
             text-align: center;
             width: 95%;
             max-width: 90vh; 
-            /* 修正：將 min-height 設為 98vh，讓白色區域幾乎填滿螢幕高度 */
-            min-height: 98vh; 
+            min-height: 98vh; /* 確保佔滿垂直空間 */
             display: flex;
             flex-direction: column;
             gap: 3vmin;
@@ -61,13 +60,14 @@
             font-weight: bold;
         }
         
-        /* 計分板樣式 - 位於底部 */
+        /* 計分板樣式 - 移到底部並加上邊距避開手機 UI */
         #scoreDisplay {
             font-size: clamp(20px, 4vmin, 24px);
             font-weight: bold;
             color: #007BFF;
             margin-top: auto; 
-            margin-bottom: 2vmin;
+            /* 修正：增加底部邊距，將分數上推，避開手機底部操作欄/手勢區 */
+            margin-bottom: 5vmin; 
             text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
         }
 
@@ -124,28 +124,30 @@
             transition: background-color 0.3s;
         }
         
-        /* 選項區 - 橫排三列 (GRID) */
+        /* 選項區 - 核心修改：橫排三列 (GRID) */
         .options-area {
             display: grid; 
             grid-template-columns: repeat(3, 1fr);
-            gap: 3vmin; 
+            gap: 2vmin; /* 修正：縮小間距，讓按鈕能容納 */
             margin-top: 2vmin;
-            flex-grow: 0; 
             justify-content: center;
         }
 
         .option-button {
+            /* UX 規範：最小 96px */
             min-width: 96px;
             min-height: 96px; 
-            padding: 4vmin; 
+            
+            /* 修正：縮小 padding，讓按鈕在橫向上有更多空間 */
+            padding: 1vmin; 
             margin: 4px; 
             
             border: 4px solid #FFC300; 
             border-radius: 20px; 
             cursor: pointer;
             position: relative;
-            /* 修正：選項按鈕高度增加到 28vmin，讓圖片有更多空間 */
-            height: 28vmin; 
+            /* 修正：選項按鈕高度縮小，防止溢出 */
+            height: 22vmin; 
             display: flex;
             justify-content: center;
             align-items: center;
@@ -195,7 +197,6 @@
                 padding: 0 50px; 
             }
             .options-area {
-                /* 平板：答案改四欄 */
                 grid-template-columns: repeat(4, 1fr);
             }
             .option-button {
@@ -222,7 +223,7 @@
         
         <div class="question-area" id="questionArea">
             <img id="num1Img" src="" alt="Numberblock 1">
-            <span class="operator" id="operator">-</span>
+            <span class="operator" id="operator">-"></span>
             <img id="num2Img" src="" alt="Numberblock 2">
             <span class="equals">=</span>
             <div class="placeholder" id="answerPlaceholder">?</div>
@@ -269,7 +270,7 @@
         let opValue = '';
         let score = 0;
 
-        // --- 全頁面煙火動畫函式 ---
+        // --- 全頁面煙火動畫函式 (功能不變) ---
         function createFireworks() {
             const colors = ['#FFC300', '#FF5733', '#C70039', '#900C3F', '#581845', '#00BFFF', '#32CD32', '#FF69B4'];
             const numBursts = 5; 
