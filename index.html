@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Numberblocks Math Fun! (Final Optimized UI)</title>
+    <title>Numberblocks Math Fun! (Final 2x2 Layout)</title>
     <style>
         /* 基礎樣式和響應式排版 */
         body {
@@ -11,19 +11,14 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            /* 修正：移除 min-height: 100vh; 讓內容決定高度，防止畫面過長 */
-            height: 100%;
-            min-height: 100vh; 
+            min-height: 100vh;
             background: linear-gradient(to bottom, #87CEEB, #B0E0E6);
             margin: 0;
             position: relative;
-            /* 修正：移除 overflow-y: auto; 確保遊戲內容全部在螢幕內 */
             overflow: hidden; 
         }
         
         /* 雲朵動畫 (已移除) */
-        /* .cloud 相關 CSS 已刪除 */
-        /* @keyframes moveClouds 已刪除 */
 
         /* 遊戲主容器 - 佔據約 80% 的視窗空間 */
         .game-container {
@@ -34,12 +29,10 @@
             text-align: center;
             width: 95%;
             max-width: 90vh; 
-            /* 修正：最大高度限制在 95vh，避免內容超出螢幕 */
             max-height: 95vh;
             display: flex;
             flex-direction: column;
-            /* 修正：縮小區塊間的間距，讓畫面更緊湊 */
-            gap: 2vmin; 
+            gap: 2vmin;
             position: relative;
             z-index: 10;
         }
@@ -57,7 +50,6 @@
             font-weight: bold;
             color: #007BFF;
             margin-top: 1vmin; 
-            /* 修正：縮小與下方算式區的間距 */
             margin-bottom: 2vmin; 
             text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
         }
@@ -67,9 +59,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            /* 修正：縮小算式元素之間的間距 (原 4vmin，縮小 50%) */
             gap: 2vmin; 
-            margin-bottom: 4vmin;
+            margin-bottom: 0;
             min-height: 42vmin; 
             position: relative;
         }
@@ -100,23 +91,34 @@
         }
 
         .question-area .operator {
-            /* 運算符號等比例放大 */
             font-size: 14.4vmin;
             font-weight: bold;
             color: #333;
         }
 
-        /* --- 動畫舞台 --- */
+        /* --- 動畫舞台：答案圖片脈衝區 --- */
         #animationStage {
-            min-height: 42vmin; /* 配合圖片高度 */
+            min-height: 42vmin; 
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
             z-index: 15;
-            /* 修正：縮小與選項區的間距 */
-            margin-bottom: 2vmin;
+            margin-bottom: 0;
+            margin-top: 0;
+            padding-bottom: 2vmin; 
         }
+        
+        /* 答案等號樣式 (新增) */
+        #answerEquals {
+            font-size: 14.4vmin; /* 與算式運算符號大小一致 */
+            font-weight: bold;
+            color: #333;
+            margin-right: 2vmin; /* 確保與圖片有間距 */
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
         #answerImg {
             height: 42vmin; 
             object-fit: contain;
@@ -140,10 +142,9 @@
         .options-area {
             display: grid; 
             grid-template-columns: repeat(2, 1fr); 
-            gap: 2vmin; /* 修正：縮小間距 */
-            margin-top: 1vmin;
-            /* 修正：確保選項區域不會過度拉伸，避免被裁切 */
-            flex-grow: 0; 
+            gap: 2vmin; 
+            margin-top: 0; 
+            flex-grow: 1; 
             justify-content: center;
         }
         /* 答對後，選項區快速淡出 */
@@ -161,8 +162,7 @@
             border-radius: 20px; 
             cursor: pointer;
             position: relative;
-            /* 修正：選項按鈕高度稍微縮小，確保 2x2 佈局能適應所有手機高度 */
-            height: 30vmin; 
+            height: 35vmin; 
             display: flex;
             justify-content: center;
             align-items: center;
@@ -204,6 +204,11 @@
 </head>
 <body>
     
+    <div class="cloud"></div>
+    <div class="cloud"></div>
+    <div class="cloud"></div>
+    <div class="cloud"></div>
+
     <div id="fireworksContainer" class="fireworks-container"></div>
 
     <div class="game-container">
@@ -218,6 +223,7 @@
         </div>
         
         <div id="animationStage">
+            <span id="answerEquals">=</span>
             <img id="answerImg" src="" alt="Answer Block">
         </div>
 
@@ -246,6 +252,7 @@
         const scoreDisplay = document.getElementById('scoreDisplay');
         const fireworksContainer = document.getElementById('fireworksContainer');
         const answerImg = document.getElementById('answerImg'); 
+        const answerEquals = document.getElementById('answerEquals'); // 新增：等號元素
         
         let correctAnswer = 0;
         let opValue = '';
@@ -289,7 +296,10 @@
         }
 
         function generateQuestion() {
+            // 重置答案區狀態
             answerImg.style.opacity = 0; 
+            answerEquals.style.opacity = 0; // 隱藏等號
+            answerImg.classList.remove('pulse-animation'); // 移除動畫類
             optionsArea.classList.remove('fade-out'); 
             
             let num1, num2, op;
@@ -323,7 +333,7 @@
             let options = new Set();
             options.add(correctAnswer); 
             
-            const totalOptions = 4; 
+            const totalOptions = 4; // 總選項數量為 4
 
             while (options.size < totalOptions) {
                 let randomOption = Math.floor(Math.random() * 10) + 1; 
@@ -358,9 +368,10 @@
             // 1. 隱藏選項區
             optionsArea.classList.add('fade-out');
 
-            // 2. 答案圖片出現在中央並開始脈衝
+            // 2. 答案圖片和等號出現在中央並開始脈衝
             answerImg.src = numberblockImages[correctAnswer];
             answerImg.style.opacity = 1;
+            answerEquals.style.opacity = 1; // 顯示等號
             answerImg.classList.add('pulse-animation');
             
             // 啟動全頁面煙火特效
@@ -396,10 +407,8 @@
                 button.classList.add('wrong');
                 const wrongIndicator = document.createElement('div');
                 wrongIndicator.classList.add('wrong-indicator');
-                with (button) {
-                    // 為了確保❌圖標不被遮擋
-                    appendChild(wrongIndicator);
-                }
+                wrongIndicator.textContent = '❌';
+                button.appendChild(wrongIndicator);
                 
                 document.querySelectorAll('.option-button').forEach(btn => {
                     btn.style.pointerEvents = 'auto';
